@@ -24,10 +24,6 @@
     }
   };
 
-  const setActiveTab = (tabIndex: number) => {
-    activeTab = tabIndex;
-  };
-
   const assignFileHash = async (file: File) => {
     try {
       switch (await getMd5(file)) {
@@ -74,25 +70,30 @@
     <p style="text-align: left; margin-right: 3%;">Version:</p>
     <Select loadOptions={getTags} --background="black" --list-background="black" --item-hover-color="black"/>
   </div>
-  <div class="file-info">
-    <div class="tabs">
-      <div class="tab" class:selected={activeTab === 0} on:click={() => setActiveTab(0)}>N64</div>
-      <div class="tab" class:selected={activeTab === 1} on:click={() => setActiveTab(1)}>Wii</div>
-      <div class="tab" class:selected={activeTab === 2} on:click={() => setActiveTab(2)}>Wii U</div>
-      <div class="tab" class:selected={activeTab === 3} on:click={() => setActiveTab(3)}>Switch</div>
-    </div>
-    <div class="asdfasdf">
-      <label for="outfile">Output file:</label>
-      <input type="text" id="outfile" name="outfile"><br><br>
-      {#if activeTab === 0}
-      {/if}
-      {#if activeTab === 1}
-      {/if}
-      {#if activeTab === 2}
-      {/if}
-      {#if activeTab === 3}
-      {/if}
-    </div>
+  <div class="radio-buttons">
+    <label for="n64">
+      <input type="radio" id="n64" name="platform" value="N64">
+      N64
+    </label>
+  
+    <label for="wii">
+      <input type="radio" id="wii" name="platform" value="Wii">
+      Wii
+    </label>
+  
+    <label for="wiiu">
+      <input type="radio" id="wiiu" name="platform" value="Wii U">
+      Wii U
+    </label>
+  
+    <label for="switch">
+      <input type="radio" id="switch" name="platform" value="Switch">
+      Switch
+    </label>
+  </div>
+  <div class="asdfasdf">
+    <label for="outfile">Output file:</label>
+    <input type="text" style="height:30px; width:300px; margin-left: 3%" id="outfile" name="outfile"><br><br>
   </div>
 
   <button class="injectButton" on:click={() => buildFp()}>Build</button>
@@ -110,34 +111,18 @@
     max-width: max-content;
   }
 
-  .tabs {
+  .fileButton {
+    width: 30%;
+  }
+
+  .radio-buttons {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-around;
-    width: 100%;
-    padding-top: 0px;
-  }
-
-  .tab {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-start-end-radius: 5px;
-    cursor: pointer;
-    user-select: none;
-    width: 25%;
-    align-self: first baseline;
-  }
-
-  .file-info {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 450px;
-    height: 300px;
     flex-direction: column;
   }
 
-  .fileButton {
-    width: 30%;
+  .radio-buttons label {
+    display: flex;
+    align-items: center;
   }
 
   .injectButton {
@@ -145,6 +130,6 @@
   }
   
   .asdfasdf {
-    padding-top: 1%
+    padding-top: 5%
   }
 </style>
