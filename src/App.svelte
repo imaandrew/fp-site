@@ -2,21 +2,51 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getTags } from './lib/github'
+  import { getTags } from './lib/github';
+  import { getMd5 } from './lib/md5';
   import Select from 'svelte-select';
   let fileName: string;
   let fileInput: HTMLInputElement;
-  let activeTab = 0;
+  let ver: Version;
+  let romHashMessage = "";
+
+  enum Version {
+    Us,
+    Jp,
+    Unknown,
+  }
 
   const handleFileSelect = async (event: any) => {
     const file = event.target.files[0];
     if (file) {
       fileName = file.name;
+      assignFileHash(file);
     }
   };
 
   const setActiveTab = (tabIndex: number) => {
     activeTab = tabIndex;
+  };
+
+  const assignFileHash = async (file: File) => {
+    try {
+      switch (await getMd5(file)) {
+        case "a722f8161ff489943191330bf8416496":
+          ver = Version.Us;
+          romHashMessage = "Valid US ROM";
+          break;
+        case "df54f17fb84fb5b5bcf6aa9af65b0942":
+          ver = Version.Jp;
+          romHashMessage = "Valid JP ROM";
+          break;
+        default:
+          ver = Version.Unknown;
+          romHashMessage = "Unknown ROM";
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const buildFp = () => {
@@ -31,6 +61,7 @@
     <button class="fileButton" on:click={() => fileInput.click()}>Open File</button>
     <label for="fileInput" style="text-align: left; margin-left: 3%;">{fileName || 'No file selected.'}</label>
   </div>
+  <p>{romHashMessage}</p>
   <input
     type="file"
     id="fileInput"
