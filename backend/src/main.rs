@@ -3,6 +3,9 @@ use path_absolutize::Absolutize;
 use std::path::Path as SysPath;
 use tokio_util::io::ReaderStream;
 
+mod builder;
+use builder::build_patches;
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
@@ -42,7 +45,10 @@ async fn get_patch(Path((tag, version)): Path<(String, String)>) -> impl IntoRes
 
     let file = match tokio::fs::File::open(&path).await {
         Ok(file) => file,
-        Err(_) => panic!(),
+        Err(_) => {
+            build_patches(tag, version);
+            tokio::fs::File::open(&path).await.unwrap()
+        }
     };
 
     let stream = ReaderStream::new(file);
