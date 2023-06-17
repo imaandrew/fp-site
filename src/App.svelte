@@ -43,10 +43,21 @@
     }
   };
 
+  let selectedOption: string;
+  
+  function handleInputChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    selectedOption = target.value;
+  }
+  
+  onMount(() => {
+    selectedOption = 'n64';
+  });
+
   const buildFp = () => {};
 </script>
 
-<h1>FP injection site</h1>
+<h1>cool site</h1>
 
 <div class="container">
   <div style="display: flex; align-items: center;">
@@ -78,37 +89,58 @@
       --item-hover-color="black"
     />
   </div>
-  <div class="radio-buttons">
-    <label for="n64">
-      <input type="radio" id="n64" name="platform" value="N64" />
-      N64
-    </label>
-
-    <label for="wii">
-      <input type="radio" id="wii" name="platform" value="Wii" />
-      Wii
-    </label>
-
-    <label for="wiiu">
-      <input type="radio" id="wiiu" name="platform" value="Wii U" />
-      Wii U
-    </label>
-
-    <label for="switch">
-      <input type="radio" id="switch" name="platform" value="Switch" />
-      Switch
-    </label>
+  <div style="display: flex">
+    <div class="radio-buttons">
+      <label for="n64">
+        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="n64" />
+        N64
+      </label>
+  
+      <label for="wii">
+        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="wii" />
+        Wii
+      </label>
+  
+      <label for="wiiu">
+        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="wiiu" />
+        Wii U
+      </label>
+  
+      <label for="switch">
+        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="switch" />
+        Switch
+      </label>
+    </div>
+    <div class="platform-settings">
+      <div style="display: flex">
+        <label for="outfile" style="margin-left: 10%; margin-right: 5%; white-space: nowrap">Output file:</label>
+        <input
+          type="text"
+          style="height:30px; width:300px;"
+          id="outfile"
+          name="outfile"
+        /><br /><br />
+      </div>
+        <div class="settings" style="height: {selectedOption === "wii" ? '120px' : '0px'}">
+          <div style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap">
+            <label for="channel-title" style="white-space: nowrap; margin-right: 5%">Channel title:</label>
+            <input type="text" style="height: 30px; width: 300px;" id="channel-title" name="channel-title" />
+            <br /><br />
+          </div>
+          <div style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap">
+            <label for="channel-id" style="white-space: nowrap; margin-right: 5%">Channel id:</label>
+            <input type="text" style="height: 30px; width: 300px;" id="channel-id" name="channel-id" />
+            <br /><br />
+          </div>
+        </div>
+        <div class="settings" style="height: {selectedOption === "wiiu" ? '120px' : '0px'}">
+          <p>Coming soon</p>
+        </div>
+        <div class="settings" style="height: {selectedOption === "switch" ? '120px' : '0px'}">
+          <p>Coming soon</p>
+        </div>
+    </div>
   </div>
-  <div class="asdfasdf">
-    <label for="outfile">Output file:</label>
-    <input
-      type="text"
-      style="height:30px; width:300px; margin-left: 3%"
-      id="outfile"
-      name="outfile"
-    /><br /><br />
-  </div>
-
   <button class="injectButton" on:click={() => buildFp()}>Build</button>
 </div>
 
@@ -120,7 +152,7 @@
     justify-content: space-between;
     display: inline-flex;
     height: 30%;
-    max-width: max-content;
+    max-width: 500px;
   }
 
   .fileButton {
@@ -135,13 +167,26 @@
   .radio-buttons label {
     display: flex;
     align-items: center;
+    padding: 5%;
   }
 
   .injectButton {
     background-color: seagreen;
   }
 
-  .asdfasdf {
-    padding-top: 5%;
+  .platform-settings {
+    flex-direction: column;
+    row-gap: 15%;
+    display: inline-flex;
   }
+
+  .settings {
+    flex-direction: column;
+    row-gap: 10px;
+    justify-content: space-between;
+    display: inline-flex;
+    transition: height 0.5s;
+    overflow: hidden;
+  }
+
 </style>
