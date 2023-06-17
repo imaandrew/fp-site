@@ -14,8 +14,9 @@
     Unknown,
   }
 
-  const handleFileSelect = async (event: any) => {
-    const file = event.target.files[0];
+  const handleFileSelect = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files[0];
     if (file) {
       fileName = file.name;
       assignFileHash(file);
@@ -44,17 +45,19 @@
   };
 
   let selectedOption: string;
-  
+
   function handleInputChange(event: Event) {
     const target = event.target as HTMLInputElement;
     selectedOption = target.value;
   }
-  
+
   onMount(() => {
-    selectedOption = 'n64';
+    selectedOption = "n64";
   });
 
-  const buildFp = () => {};
+  const buildFp = () => {
+    return;
+  };
 </script>
 
 <h1>cool site</h1>
@@ -92,28 +95,52 @@
   <div style="display: flex">
     <div class="radio-buttons">
       <label for="n64">
-        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="n64" />
+        <input
+          type="radio"
+          bind:group={selectedOption}
+          on:change={handleInputChange}
+          value="n64"
+        />
         N64
       </label>
-  
+
       <label for="wii">
-        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="wii" />
+        <input
+          type="radio"
+          bind:group={selectedOption}
+          on:change={handleInputChange}
+          value="wii"
+        />
         Wii
       </label>
-  
+
       <label for="wiiu">
-        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="wiiu" />
+        <input
+          type="radio"
+          bind:group={selectedOption}
+          on:change={handleInputChange}
+          value="wiiu"
+        />
         Wii U
       </label>
-  
+
       <label for="switch">
-        <input type="radio" bind:group={selectedOption} on:change={handleInputChange} value="switch" />
+        <input
+          type="radio"
+          bind:group={selectedOption}
+          on:change={handleInputChange}
+          value="switch"
+        />
         Switch
       </label>
     </div>
     <div class="platform-settings">
       <div style="display: flex">
-        <label for="outfile" style="margin-left: 10%; margin-right: 5%; white-space: nowrap">Output file:</label>
+        <label
+          for="outfile"
+          style="margin-left: 10%; margin-right: 5%; white-space: nowrap"
+          >Output file:</label
+        >
         <input
           type="text"
           style="height:30px; width:300px;"
@@ -121,24 +148,52 @@
           name="outfile"
         /><br /><br />
       </div>
-        <div class="settings" style="height: {selectedOption === "wii" ? '120px' : '0px'}">
-          <div style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap">
-            <label for="channel-title" style="white-space: nowrap; margin-right: 5%">Channel title:</label>
-            <input type="text" style="height: 30px; width: 300px;" id="channel-title" name="channel-title" />
-            <br /><br />
-          </div>
-          <div style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap">
-            <label for="channel-id" style="white-space: nowrap; margin-right: 5%">Channel id:</label>
-            <input type="text" style="height: 30px; width: 300px;" id="channel-id" name="channel-id" />
-            <br /><br />
-          </div>
+      <div
+        class="settings"
+        style="height: {selectedOption === 'wii' ? '120px' : '0px'}"
+      >
+        <div
+          style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap"
+        >
+          <label
+            for="channel-title"
+            style="white-space: nowrap; margin-right: 5%">Channel title:</label
+          >
+          <input
+            type="text"
+            style="height: 30px; width: 300px;"
+            id="channel-title"
+            name="channel-title"
+          />
+          <br /><br />
         </div>
-        <div class="settings" style="height: {selectedOption === "wiiu" ? '120px' : '0px'}">
-          <p>Coming soon</p>
+        <div
+          style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap"
+        >
+          <label for="channel-id" style="white-space: nowrap; margin-right: 5%"
+            >Channel id:</label
+          >
+          <input
+            type="text"
+            style="height: 30px; width: 300px;"
+            id="channel-id"
+            name="channel-id"
+          />
+          <br /><br />
         </div>
-        <div class="settings" style="height: {selectedOption === "switch" ? '120px' : '0px'}">
-          <p>Coming soon</p>
-        </div>
+      </div>
+      <div
+        class="settings"
+        style="height: {selectedOption === 'wiiu' ? '120px' : '0px'}"
+      >
+        <p>Coming soon</p>
+      </div>
+      <div
+        class="settings"
+        style="height: {selectedOption === 'switch' ? '120px' : '0px'}"
+      >
+        <p>Coming soon</p>
+      </div>
     </div>
   </div>
   <button class="injectButton" on:click={() => buildFp()}>Build</button>
@@ -188,5 +243,4 @@
     transition: height 0.5s;
     overflow: hidden;
   }
-
 </style>
