@@ -10,7 +10,7 @@
   let ver: string;
   let tag: { label: string };
   let romHashMessage = "";
-  let outFileName;
+  let outFileName: string;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
