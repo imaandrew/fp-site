@@ -3,23 +3,21 @@
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
   import Select from "svelte-select";
+  import { n64_decode } from "fp-web-patcher";
   let fileName: string;
+  let file: File;
   let fileInput: HTMLInputElement;
-  let ver: Version;
+  let ver: string;
+  let tag: { label: string };
   let romHashMessage = "";
-
-  enum Version {
-    Us,
-    Jp,
-    Unknown,
-  }
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
-    const file = target.files[0];
-    if (file) {
-      fileName = file.name;
-      assignFileHash(file);
+    const f = target.files[0];
+    if (f) {
+      file = f;
+      fileName = f.name;
+      assignFileHash(f);
     }
   };
 
@@ -27,15 +25,15 @@
     try {
       switch (await getMd5(file)) {
         case "a722f8161ff489943191330bf8416496":
-          ver = Version.Us;
+          ver = "us";
           romHashMessage = "Valid US ROM";
           break;
         case "df54f17fb84fb5b5bcf6aa9af65b0942":
-          ver = Version.Jp;
+          ver = "jp";
           romHashMessage = "Valid JP ROM";
           break;
         default:
-          ver = Version.Unknown;
+          ver = "unk";
           romHashMessage = "Unknown ROM";
           break;
       }
@@ -55,8 +53,58 @@
     selectedOption = "n64";
   });
 
+  function readFileAsUint8Array(file: File): Promise<Uint8Array> {
+    return new Promise<Uint8Array>((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        const uint8Array = new Uint8Array(arrayBuffer);
+        resolve(uint8Array);
+      };
+
+      reader.onerror = (event) => {
+        reject(event.target?.error);
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  async function downloadFile(url: string): Promise<Uint8Array> {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    return uint8Array;
+  }
+
+  function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
+    const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+
+    document.body.appendChild(anchor);
+    anchor.click();
+
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
   const buildFp = () => {
-    return;
+    const rom = downloadFile(
+      `http://localhost:3000/get-patch/${tag.label}/${ver}`
+    ).then(function (patch_file: Uint8Array) {
+      return readFileAsUint8Array(file).then(function (bytes: Uint8Array) {
+        return n64_decode(bytes, patch_file);
+      });
+    });
+
+    rom.then(function (file: Uint8Array) {
+      saveUint8ArrayToFile(file, "patched.z64");
+    });
   };
 </script>
 
@@ -87,6 +135,7 @@
     <p style="text-align: left; margin-right: 3%;">Version:</p>
     <Select
       loadOptions={getTags}
+      bind:value={tag}
       --background="black"
       --list-background="black"
       --item-hover-color="black"
