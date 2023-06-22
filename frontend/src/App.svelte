@@ -10,6 +10,7 @@
   let ver: string;
   let tag: { label: string };
   let romHashMessage = "";
+  let outFileName;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -47,6 +48,10 @@
   function handleInputChange(event: Event) {
     const target = event.target as HTMLInputElement;
     selectedOption = target.value;
+  }
+
+  function handleVersionChange() {
+    outFileName = `${tag.label}.z64`;
   }
 
   onMount(() => {
@@ -103,7 +108,7 @@
     });
 
     rom.then(function (file: Uint8Array) {
-      saveUint8ArrayToFile(file, "patched.z64");
+      saveUint8ArrayToFile(file, outFileName);
     });
   };
 </script>
@@ -136,6 +141,7 @@
     <Select
       loadOptions={getTags}
       bind:value={tag}
+      on:change={handleVersionChange}
       --background="black"
       --list-background="black"
       --item-hover-color="black"
@@ -195,6 +201,7 @@
           style="height:30px; width:300px;"
           id="outfile"
           name="outfile"
+          bind:value={outFileName}
         /><br /><br />
       </div>
       <div
