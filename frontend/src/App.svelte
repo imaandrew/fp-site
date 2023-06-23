@@ -4,6 +4,7 @@
   import { getMd5 } from "./lib/md5";
   import Select from "svelte-select";
   import { n64_decode } from "fp-web-patcher";
+  import { getN64Patch } from "./lib/get_patch";
   let fileName: string;
   let file: File;
   let fileInput: HTMLInputElement;
@@ -76,13 +77,6 @@
     });
   }
 
-  async function downloadFile(url: string): Promise<Uint8Array> {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    return uint8Array;
-  }
-
   function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
     const blob = new Blob([uint8Array], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
@@ -99,12 +93,11 @@
   }
 
   const buildFp = () => {
-    const rom = downloadFile(
-      `http://localhost:3000/get-patch/${tag.label}/${ver}`
-    ).then(function (patch_file: Uint8Array) {
-      return readFileAsUint8Array(file).then(function (bytes: Uint8Array) {
-        return n64_decode(bytes, patch_file);
-      });
+    const rom = getN64Patch(tag.label, ver).then(async function (
+      patch_file: Uint8Array
+    ) {
+      const bytes = await readFileAsUint8Array(file);
+      return n64_decode(bytes, patch_file);
     });
 
     rom.then(function (file: Uint8Array) {
