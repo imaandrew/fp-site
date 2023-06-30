@@ -15,8 +15,8 @@
   import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
   let ver: string;
-  let tag;
-  let romHashMessage = "";
+  let tag: string;
+  let romHashMessage = "Choose base file";
   let outFileName: string;
   let requiredPlatform: string = null;
   let selectedPlatform: string;
@@ -47,10 +47,14 @@
         case "a722f8161ff489943191330bf8416496":
           ver = "us";
           romHashMessage = "Valid US ROM";
+          requiredPlatform = "n64";
+          selectedPlatform = "n64";
           break;
         case "df54f17fb84fb5b5bcf6aa9af65b0942":
           ver = "jp";
           romHashMessage = "Valid JP ROM";
+          requiredPlatform = "n64";
+          selectedPlatform = "n64";
           break;
         case "2aad94a7fa5f05c7544ddc0dd269c366":
           ver = "us";
@@ -66,7 +70,7 @@
           break;
         default:
           ver = "unk";
-          romHashMessage = "Unknown ROM";
+          romHashMessage = "Unknown base file";
           break;
       }
     } catch (error) {
@@ -75,6 +79,9 @@
   };
 
   function handleVersionChange() {
+    if (tag === "") {
+      return;
+    }
     switch (selectedPlatform) {
       case "n64":
         outFileName = `${tag}.z64`;
@@ -125,17 +132,17 @@
   }
 
   const buildFp = () => {
-    const outFile = getS3File(`fp/${tag.label}/${ver}.xdelta`).then(
-      async function (patch_file: Uint8Array) {
-        const input = await readFileAsUint8Array(inputFile);
-        if (selectedPlatform === "n64") {
-          return n64_decode(input, patch_file);
-        } else if (selectedPlatform === "wii") {
-          const memPatch = await getS3File(`gzi/mem_patch.gzi`);
-          return wii_inject(input, patch_file, memPatch);
-        }
+    const outFile = getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
+      patch_file: Uint8Array
+    ) {
+      const input = await readFileAsUint8Array(inputFile);
+      if (selectedPlatform === "n64") {
+        return n64_decode(input, patch_file);
+      } else if (selectedPlatform === "wii") {
+        const memPatch = await getS3File(`gzi/mem_patch.gzi`);
+        return wii_inject(input, patch_file, memPatch);
       }
-    );
+    });
 
     outFile.then(function (file: Uint8Array) {
       saveUint8ArrayToFile(file, outFileName);
@@ -149,11 +156,10 @@
   >
     <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
     <div style="flex items-center">
-      <Label for="with_helper" class="pb-2">Choose base file</Label>
-      <Fileupload id="with_helper" class="mb-2" on:change={handleFileSelect} />
+      <Label for="fileInput" class="pb-2">{romHashMessage}</Label>
+      <Fileupload id="fileInput" class="mb-2" on:change={handleFileSelect} />
       <Helper>Z64 or WAD.</Helper>
     </div>
-    <p>{romHashMessage}</p>
 
     <div class="flex items-center pb-5">
       <p class="text-left mr-3">Version:</p>
@@ -165,7 +171,10 @@
       />
     </div>
     <div class="platform-settings grid gap-6 mb-6 md:grid-cols-2">
-      <ul class="flex flex-col justify-center gap-4">
+      <ul
+        class="flex flex-col justify-center gap-4"
+        on:change={handleVersionChange}
+      >
         <li>
           <Radio
             name="platform"
