@@ -3,7 +3,7 @@
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
   import Select from "svelte-select";
-  import { n64_decode, wii_inject } from "fp-web-patcher";
+  import { n64_decode, wii_inject } from "../pkg/fp_web_patcher";
   import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
   let fileInput: HTMLInputElement;
@@ -99,18 +99,19 @@
     });
   }
 
+  // https://stackoverflow.com/a/62176999
   function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
     const blob = new Blob([uint8Array], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
 
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = fileName;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
 
-    document.body.appendChild(anchor);
-    anchor.click();
+    document.body.appendChild(a);
+    a.click();
 
-    document.body.removeChild(anchor);
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
@@ -230,7 +231,7 @@
       </div>
       <div
         class="settings"
-        style="height: {selectedOption === 'wii' ? '120px' : '0px'}"
+        style="height: {selectedOption === 'wii' ? '180px' : '0px'}"
       >
         <div
           style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap"
