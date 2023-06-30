@@ -2,16 +2,26 @@
   import { onMount } from "svelte";
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
-  import Select from "svelte-select";
   import { n64_decode, wii_inject } from "../pkg/fp_web_patcher";
+  import {
+    Fileupload,
+    Label,
+    Helper,
+    Select,
+    DarkMode,
+    Radio,
+    Input,
+    GradientButton,
+  } from "flowbite-svelte";
   import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
-  let fileInput: HTMLInputElement;
   let ver: string;
-  let tag: { label: string };
+  let tag;
   let romHashMessage = "";
   let outFileName: string;
   let requiredPlatform: string = null;
+  let selectedPlatform: string;
+  let tagList = null;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -24,6 +34,12 @@
           break;
       }
     }
+  };
+
+  const getTagList = async () => {
+    getTags().then(async function (tags: string[]) {
+      tagList = tags.map((x) => ({ name: x, value: x }));
+    });
   };
 
   const assignFileHash = async (file: File) => {
@@ -41,13 +57,13 @@
           ver = "us";
           romHashMessage = "Valid US WAD";
           requiredPlatform = "wii";
-          selectedOption = "wii";
+          selectedPlatform = "wii";
           break;
         case "161563b6cf9ba5ca22306a729896f47d":
           ver = "jp";
           romHashMessage = "Valid JP WAD";
           requiredPlatform = "wii";
-          selectedOption = "wii";
+          selectedPlatform = "wii";
           break;
         default:
           ver = "unk";
@@ -59,26 +75,20 @@
     }
   };
 
-  let selectedOption: string;
-
-  function handleInputChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    selectedOption = target.value;
-  }
-
   function handleVersionChange() {
-    switch (selectedOption) {
+    switch (selectedPlatform) {
       case "n64":
-        outFileName = `${tag.label}.z64`;
+        outFileName = `${tag}.z64`;
         break;
       case "wii":
-        outFileName = `${tag.label}.wad`;
+        outFileName = `${tag}.wad`;
         break;
     }
   }
 
   onMount(() => {
-    selectedOption = "n64";
+    selectedPlatform = "n64";
+    getTagList();
   });
 
   function readFileAsUint8Array(file: File): Promise<Uint8Array> {
@@ -119,9 +129,9 @@
     const outFile = getS3File(`fp/${tag.label}/${ver}.xdelta`).then(
       async function (patch_file: Uint8Array) {
         const input = await readFileAsUint8Array(inputFile);
-        if (selectedOption === "n64") {
+        if (selectedPlatform === "n64") {
           return n64_decode(input, patch_file);
-        } else if (selectedOption === "wii") {
+        } else if (selectedPlatform === "wii") {
           const memPatch = await getS3File(`gzi/mem_patch.gzi`);
           return wii_inject(input, patch_file, memPatch);
         }
@@ -134,194 +144,84 @@
   };
 </script>
 
-<h1>cool site</h1>
+<DarkMode />
 
-<div class="container">
-  <div style="display: flex; align-items: center;">
-    <label for="fileInput" style="text-align: left; margin-right: 3%;"
-      >ROM/WAD:</label
-    >
-    <button class="fileButton" on:click={() => fileInput.click()}
-      >Open File</button
-    >
-    <label for="fileInput" style="text-align: left; margin-left: 3%;"
-      >{inputFile ? inputFile.name : "No file selected."}</label
-    >
+<div
+  class="container dark:bg-gray-900 flex flex-col items-center justify-center mx-auto border border-sky-500 rounded max-w-md p-8"
+>
+  <h1 class="text-4xl pb-8 font-bold dark:text-white">fp patcher</h1>
+  <div style="flex items-center">
+    <Label for="with_helper" class="pb-2">Choose base file</Label>
+    <Fileupload id="with_helper" class="mb-2" on:change={handleFileSelect} />
+    <Helper>Z64 or WAD.</Helper>
   </div>
   <p>{romHashMessage}</p>
-  <input
-    type="file"
-    id="fileInput"
-    bind:this={fileInput}
-    on:change={handleFileSelect}
-    style="display: none;"
-  />
 
-  <div style="display: flex; align-items: center;">
-    <p style="text-align: left; margin-right: 3%;">Version:</p>
+  <div class="flex items-center pb-5">
+    <p class="text-left mr-3 dark:text-white">Version:</p>
     <Select
-      loadOptions={getTags}
+      class="mt-2"
+      items={tagList !== null ? tagList : []}
       bind:value={tag}
       on:change={handleVersionChange}
-      --background="black"
-      --list-background="black"
-      --item-hover-color="black"
     />
   </div>
-  <div style="display: flex">
-    <div class="radio-buttons">
-      <label for="n64">
-        <input
-          type="radio"
-          bind:group={selectedOption}
-          on:change={handleInputChange}
+  <div class="platform-settings grid gap-6 mb-6 md:grid-cols-2">
+    <ul class="flex flex-col justify-center gap-4">
+      <li>
+        <Radio
+          name="platform"
           value="n64"
           disabled={requiredPlatform !== null && requiredPlatform !== "n64"}
-        />
-        N64
-      </label>
-
-      <label for="wii">
-        <input
-          type="radio"
-          bind:group={selectedOption}
-          on:change={handleInputChange}
+          bind:group={selectedPlatform}>N64</Radio
+        >
+      </li>
+      <li>
+        <Radio
+          name="platform"
           value="wii"
           disabled={requiredPlatform !== null && requiredPlatform !== "wii"}
-        />
-        Wii
-      </label>
-
-      <label for="wiiu">
-        <input
-          type="radio"
-          bind:group={selectedOption}
-          on:change={handleInputChange}
+          bind:group={selectedPlatform}>Wii</Radio
+        >
+      </li>
+      <li>
+        <Radio
+          name="platform"
           value="wiiu"
           disabled={requiredPlatform !== null && requiredPlatform !== "wiiu"}
-        />
-        Wii U
-      </label>
-
-      <label for="switch">
-        <input
-          type="radio"
-          bind:group={selectedOption}
-          on:change={handleInputChange}
+          bind:group={selectedPlatform}>Wii U</Radio
+        >
+      </li>
+      <li>
+        <Radio
+          name="platform"
           value="switch"
           disabled={requiredPlatform !== null && requiredPlatform !== "switch"}
-        />
-        Switch
-      </label>
-    </div>
-    <div class="platform-settings">
-      <div style="display: flex">
-        <label
-          for="outfile"
-          style="margin-left: 10%; margin-right: 5%; white-space: nowrap"
-          >Output file:</label
+          bind:group={selectedPlatform}>Switch</Radio
         >
-        <input
-          type="text"
-          style="height:30px; width:300px;"
-          id="outfile"
-          name="outfile"
-          bind:value={outFileName}
-        /><br /><br />
+      </li>
+    </ul>
+    <div>
+      <div>
+        <Label for="outfile" class="mb-2">Output file</Label>
+        <Input type="text" id="outfile" bind:value={outFileName} required />
       </div>
-      <div
-        class="settings"
-        style="height: {selectedOption === 'wii' ? '180px' : '0px'}"
-      >
-        <div
-          style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap"
-        >
-          <label
-            for="channel-title"
-            style="white-space: nowrap; margin-right: 5%">Channel title:</label
-          >
-          <input
-            type="text"
-            style="height: 30px; width: 300px;"
-            id="channel-title"
-            name="channel-title"
-          />
-          <br /><br />
+      {#if selectedPlatform === "wii"}
+        <div>
+          <Label for="channel-title" class="mb-2">Channel title</Label>
+          <Input type="text" id="channel-title" required />
         </div>
-        <div
-          style="display: flex; margin-left: 10%; margin-right: 5%; white-space: nowrap"
-        >
-          <label for="channel-id" style="white-space: nowrap; margin-right: 5%"
-            >Channel id:</label
-          >
-          <input
-            type="text"
-            style="height: 30px; width: 300px;"
-            id="channel-id"
-            name="channel-id"
-          />
-          <br /><br />
+        <div>
+          <Label for="channel-id" class="mb-2">Channel id</Label>
+          <Input type="text" id="channel-id" required />
         </div>
-      </div>
-      <div
-        class="settings"
-        style="height: {selectedOption === 'wiiu' ? '120px' : '0px'}"
-      >
-        <p>Coming soon</p>
-      </div>
-      <div
-        class="settings"
-        style="height: {selectedOption === 'switch' ? '120px' : '0px'}"
-      >
-        <p>Coming soon</p>
-      </div>
+      {/if}
     </div>
   </div>
-  <button class="injectButton" on:click={() => buildFp()}>Build</button>
+  <GradientButton
+    type="submit"
+    color="greenToBlue"
+    size="xl"
+    on:click={() => buildFp()}>Build</GradientButton
+  >
 </div>
-
-<style>
-  .container {
-    flex-direction: column;
-    column-gap: 20px;
-    row-gap: 20px;
-    justify-content: space-between;
-    display: inline-flex;
-    height: 30%;
-    max-width: 500px;
-  }
-
-  .fileButton {
-    width: 30%;
-  }
-
-  .radio-buttons {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .radio-buttons label {
-    display: flex;
-    align-items: center;
-    padding: 5%;
-  }
-
-  .injectButton {
-    background-color: seagreen;
-  }
-
-  .platform-settings {
-    flex-direction: column;
-    row-gap: 15%;
-    display: inline-flex;
-  }
-
-  .settings {
-    flex-direction: column;
-    row-gap: 10px;
-    justify-content: space-between;
-    display: inline-flex;
-    transition: height 0.5s;
-    overflow: hidden;
-  }
-</style>
