@@ -8,7 +8,6 @@
     Label,
     Helper,
     Select,
-    DarkMode,
     Radio,
     Input,
     GradientButton,
@@ -144,84 +143,86 @@
   };
 </script>
 
-<DarkMode />
-
-<div
-  class="container dark:bg-gray-900 flex flex-col items-center justify-center mx-auto border border-sky-500 rounded max-w-md p-8"
->
-  <h1 class="text-4xl pb-8 font-bold dark:text-white">fp patcher</h1>
-  <div style="flex items-center">
-    <Label for="with_helper" class="pb-2">Choose base file</Label>
-    <Fileupload id="with_helper" class="mb-2" on:change={handleFileSelect} />
-    <Helper>Z64 or WAD.</Helper>
-  </div>
-  <p>{romHashMessage}</p>
-
-  <div class="flex items-center pb-5">
-    <p class="text-left mr-3 dark:text-white">Version:</p>
-    <Select
-      class="mt-2"
-      items={tagList !== null ? tagList : []}
-      bind:value={tag}
-      on:change={handleVersionChange}
-    />
-  </div>
-  <div class="platform-settings grid gap-6 mb-6 md:grid-cols-2">
-    <ul class="flex flex-col justify-center gap-4">
-      <li>
-        <Radio
-          name="platform"
-          value="n64"
-          disabled={requiredPlatform !== null && requiredPlatform !== "n64"}
-          bind:group={selectedPlatform}>N64</Radio
-        >
-      </li>
-      <li>
-        <Radio
-          name="platform"
-          value="wii"
-          disabled={requiredPlatform !== null && requiredPlatform !== "wii"}
-          bind:group={selectedPlatform}>Wii</Radio
-        >
-      </li>
-      <li>
-        <Radio
-          name="platform"
-          value="wiiu"
-          disabled={requiredPlatform !== null && requiredPlatform !== "wiiu"}
-          bind:group={selectedPlatform}>Wii U</Radio
-        >
-      </li>
-      <li>
-        <Radio
-          name="platform"
-          value="switch"
-          disabled={requiredPlatform !== null && requiredPlatform !== "switch"}
-          bind:group={selectedPlatform}>Switch</Radio
-        >
-      </li>
-    </ul>
-    <div>
-      <div>
-        <Label for="outfile" class="mb-2">Output file</Label>
-        <Input type="text" id="outfile" bind:value={outFileName} required />
-      </div>
-      {#if selectedPlatform === "wii"}
-        <div>
-          <Label for="channel-title" class="mb-2">Channel title</Label>
-          <Input type="text" id="channel-title" required />
-        </div>
-        <div>
-          <Label for="channel-id" class="mb-2">Channel id</Label>
-          <Input type="text" id="channel-id" required />
-        </div>
-      {/if}
-    </div>
-  </div>
-  <GradientButton
-    type="submit"
-    color="greenToBlue"
-    size="xl"
-    on:click={() => buildFp()}>Build</GradientButton
+<main class="min-h-screen overflow-hidden flex items-center justify-center">
+  <div
+    class="container flex flex-col items-center justify-center border border-sky-500 rounded max-w-md p-8 dark:text-white"
   >
-</div>
+    <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
+    <div style="flex items-center">
+      <Label for="with_helper" class="pb-2">Choose base file</Label>
+      <Fileupload id="with_helper" class="mb-2" on:change={handleFileSelect} />
+      <Helper>Z64 or WAD.</Helper>
+    </div>
+    <p>{romHashMessage}</p>
+
+    <div class="flex items-center pb-5">
+      <p class="text-left mr-3">Version:</p>
+      <Select
+        class="mt-2"
+        items={tagList !== null ? tagList : []}
+        bind:value={tag}
+        on:change={handleVersionChange}
+      />
+    </div>
+    <div class="platform-settings grid gap-6 mb-6 md:grid-cols-2">
+      <ul class="flex flex-col justify-center gap-4">
+        <li>
+          <Radio
+            name="platform"
+            value="n64"
+            disabled={requiredPlatform !== null && requiredPlatform !== "n64"}
+            bind:group={selectedPlatform}>N64</Radio
+          >
+        </li>
+        <li>
+          <Radio
+            name="platform"
+            value="wii"
+            disabled={requiredPlatform !== null && requiredPlatform !== "wii"}
+            bind:group={selectedPlatform}>Wii</Radio
+          >
+        </li>
+        <li>
+          <Radio
+            name="platform"
+            value="wiiu"
+            disabled={requiredPlatform !== null && requiredPlatform !== "wiiu"}
+            bind:group={selectedPlatform}>Wii U</Radio
+          >
+        </li>
+        <li>
+          <Radio
+            name="platform"
+            value="switch"
+            disabled={requiredPlatform !== null &&
+              requiredPlatform !== "switch"}
+            bind:group={selectedPlatform}>Switch</Radio
+          >
+        </li>
+      </ul>
+      <div>
+        <div>
+          <Label for="outfile" class="mb-2">Output file</Label>
+          <Input type="text" id="outfile" bind:value={outFileName} required />
+        </div>
+        {#if selectedPlatform === "wii"}
+          <div>
+            <Label for="channel-title" class="mb-2">Channel title</Label>
+            <Input type="text" id="channel-title" required />
+          </div>
+          <div>
+            <Label for="channel-id" class="mb-2">Channel id</Label>
+            <Input type="text" id="channel-id" required />
+          </div>
+        {/if}
+      </div>
+    </div>
+    <GradientButton
+      type="submit"
+      color="greenToBlue"
+      size="xl"
+      class="w-1/3"
+      on:click={() => buildFp()}>Build</GradientButton
+    >
+  </div>
+</main>
