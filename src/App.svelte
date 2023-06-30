@@ -3,23 +3,26 @@
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
   import Select from "svelte-select";
-  import { n64_decode } from "fp-web-patcher";
-  import { getN64Patch } from "./lib/get_patch";
-  let fileName: string;
-  let file: File;
+  import { n64_decode, wii_inject } from "fp-web-patcher";
+  import { getS3File } from "./lib/get_s3_file";
+  let inputFile: File;
   let fileInput: HTMLInputElement;
   let ver: string;
   let tag: { label: string };
   let romHashMessage = "";
   let outFileName: string;
+  let requiredPlatform: string = null;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
     const f = target.files[0];
     if (f) {
-      file = f;
-      fileName = f.name;
-      assignFileHash(f);
+      switch (target.id) {
+        case "fileInput":
+          inputFile = f;
+          assignFileHash(f);
+          break;
+      }
     }
   };
 
@@ -33,6 +36,18 @@
         case "df54f17fb84fb5b5bcf6aa9af65b0942":
           ver = "jp";
           romHashMessage = "Valid JP ROM";
+          break;
+        case "2aad94a7fa5f05c7544ddc0dd269c366":
+          ver = "us";
+          romHashMessage = "Valid US WAD";
+          requiredPlatform = "wii";
+          selectedOption = "wii";
+          break;
+        case "161563b6cf9ba5ca22306a729896f47d":
+          ver = "jp";
+          romHashMessage = "Valid JP WAD";
+          requiredPlatform = "wii";
+          selectedOption = "wii";
           break;
         default:
           ver = "unk";
@@ -52,7 +67,14 @@
   }
 
   function handleVersionChange() {
-    outFileName = `${tag.label}.z64`;
+    switch (selectedOption) {
+      case "n64":
+        outFileName = `${tag.label}.z64`;
+        break;
+      case "wii":
+        outFileName = `${tag.label}.wad`;
+        break;
+    }
   }
 
   onMount(() => {
@@ -93,14 +115,19 @@
   }
 
   const buildFp = () => {
-    const rom = getN64Patch(tag.label, ver).then(async function (
-      patch_file: Uint8Array
-    ) {
-      const bytes = await readFileAsUint8Array(file);
-      return n64_decode(bytes, patch_file);
-    });
+    const outFile = getS3File(`fp/${tag.label}/${ver}.xdelta`).then(
+      async function (patch_file: Uint8Array) {
+        const input = await readFileAsUint8Array(inputFile);
+        if (selectedOption === "n64") {
+          return n64_decode(input, patch_file);
+        } else if (selectedOption === "wii") {
+          const memPatch = await getS3File(`gzi/mem_patch.gzi`);
+          return wii_inject(input, patch_file, memPatch);
+        }
+      }
+    );
 
-    rom.then(function (file: Uint8Array) {
+    outFile.then(function (file: Uint8Array) {
       saveUint8ArrayToFile(file, outFileName);
     });
   };
@@ -111,13 +138,13 @@
 <div class="container">
   <div style="display: flex; align-items: center;">
     <label for="fileInput" style="text-align: left; margin-right: 3%;"
-      >ROM:</label
+      >ROM/WAD:</label
     >
     <button class="fileButton" on:click={() => fileInput.click()}
       >Open File</button
     >
     <label for="fileInput" style="text-align: left; margin-left: 3%;"
-      >{fileName || "No file selected."}</label
+      >{inputFile ? inputFile.name : "No file selected."}</label
     >
   </div>
   <p>{romHashMessage}</p>
@@ -148,6 +175,7 @@
           bind:group={selectedOption}
           on:change={handleInputChange}
           value="n64"
+          disabled={requiredPlatform !== null && requiredPlatform !== "n64"}
         />
         N64
       </label>
@@ -158,6 +186,7 @@
           bind:group={selectedOption}
           on:change={handleInputChange}
           value="wii"
+          disabled={requiredPlatform !== null && requiredPlatform !== "wii"}
         />
         Wii
       </label>
@@ -168,6 +197,7 @@
           bind:group={selectedOption}
           on:change={handleInputChange}
           value="wiiu"
+          disabled={requiredPlatform !== null && requiredPlatform !== "wiiu"}
         />
         Wii U
       </label>
@@ -178,6 +208,7 @@
           bind:group={selectedOption}
           on:change={handleInputChange}
           value="switch"
+          disabled={requiredPlatform !== null && requiredPlatform !== "switch"}
         />
         Switch
       </label>
