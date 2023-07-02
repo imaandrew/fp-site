@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
-  import { n64_decode, wii_inject } from "../pkg/fp_web_patcher";
+  import { n64_decode, wii_inject } from "fp-web-patcher";
   import { slide } from "svelte/transition";
   import {
     Fileupload,
@@ -141,7 +141,14 @@
         return n64_decode(input, patch_file);
       } else if (selectedPlatform === "wii") {
         const memPatch = await getS3File(`gzi/mem_patch.gzi`);
-        return wii_inject(input, patch_file, memPatch);
+        const settings = {
+          wad: input,
+          xdelta_patch: patch_file,
+          gzi_patch: memPatch,
+          channel_id: "FPVC",
+          title: `fp-${ver}`
+        };
+        return wii_inject(settings);
       }
     });
 
