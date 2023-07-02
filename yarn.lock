@@ -2095,9 +2095,9 @@ for-each@^0.3.3:
     is-callable "^1.1.3"
 
 fp-web-patcher@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/fp-web-patcher/-/fp-web-patcher-0.2.0.tgz#5142d5a2efb07a947902554c8e625172cad3de3f"
-  integrity sha512-v+ewUUsj282t7KeIer9rItXbbIQMm7QRMnkFt+d5Bx+25pOHmGG/bXoFi5yPL9gdgkobVEj8mTmhU8wCAXtmGw==
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/fp-web-patcher/-/fp-web-patcher-0.2.1.tgz#e3d74d26eea9d307b734d96fbb0d983730f126e0"
+  integrity sha512-xZlAHVbJmlPOvPtCpH2n9KuMwAebWAP1GxWRC2XEJpo29ie6eifdAB/4Ix9ZPsyyJY0Fms5W38FG8WGmikOBWQ==
 
 fraction.js@^4.2.0:
   version "4.2.0"
