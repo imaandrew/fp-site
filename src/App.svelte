@@ -17,6 +17,8 @@
   let inputFile: File;
   let ver: string;
   let tag: string;
+  let channelId: string;
+  let title: string;
   let romHashMessage = "Choose base file";
   let outFileName: string;
   let requiredPlatform: string = null;
@@ -62,12 +64,16 @@
           romHashMessage = "Valid US WAD";
           requiredPlatform = "wii";
           selectedPlatform = "wii";
+          channelId = "FPUS";
+          title = "fp-US";
           break;
         case "161563b6cf9ba5ca22306a729896f47d":
           ver = "jp";
           romHashMessage = "Valid JP WAD";
           requiredPlatform = "wii";
           selectedPlatform = "wii";
+          channelId = "FPJP";
+          title = "fp-JP";
           break;
         default:
           ver = "unk";
@@ -145,8 +151,8 @@
           wad: input,
           xdelta_patch: patch_file,
           gzi_patch: memPatch,
-          channel_id: "FPVC",
-          title: `fp-${ver}`
+          channel_id: channelId,
+          title: title,
         };
         return wii_inject(settings);
       }
@@ -226,11 +232,21 @@
           <div transition:slide>
             <div class="flex items-center pb-5 whitespace-nowrap">
               <p class="text-left mr-3">Channel title:</p>
-              <Input type="text" id="channel-title" required />
+              <Input
+                type="text"
+                id="channel-title"
+                bind:value={title}
+                required
+              />
             </div>
             <div class="flex items-center pb-5 whitespace-nowrap">
               <p class="text-left mr-3">Channel id:</p>
-              <Input type="text" id="channel-id" required />
+              <Input
+                type="text"
+                id="channel-id"
+                bind:value={channelId}
+                required
+              />
             </div>
           </div>
         {/if}
