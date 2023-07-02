@@ -3,6 +3,7 @@
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
   import { n64_decode, wii_inject } from "../pkg/fp_web_patcher";
+  import { slide } from "svelte/transition";
   import {
     Fileupload,
     Label,
@@ -170,7 +171,7 @@
         on:change={handleVersionChange}
       />
     </div>
-    <div class="platform-settings grid gap-6 mb-6 md:grid-cols-2">
+    <div class="platform-settings grid gap-1 mb-6 md:grid-cols-[100px_auto]">
       <ul
         class="flex flex-col justify-center gap-4"
         on:change={handleVersionChange}
@@ -210,18 +211,20 @@
         </li>
       </ul>
       <div>
-        <div>
-          <Label for="outfile" class="mb-2">Output file</Label>
+        <div class="flex items-center pb-5 whitespace-nowrap">
+          <p class="text-left mr-3">Output file:</p>
           <Input type="text" id="outfile" bind:value={outFileName} required />
         </div>
         {#if selectedPlatform === "wii"}
-          <div>
-            <Label for="channel-title" class="mb-2">Channel title</Label>
-            <Input type="text" id="channel-title" required />
-          </div>
-          <div>
-            <Label for="channel-id" class="mb-2">Channel id</Label>
-            <Input type="text" id="channel-id" required />
+          <div transition:slide>
+            <div class="flex items-center pb-5 whitespace-nowrap">
+              <p class="text-left mr-3">Channel title:</p>
+              <Input type="text" id="channel-title" required />
+            </div>
+            <div class="flex items-center pb-5 whitespace-nowrap">
+              <p class="text-left mr-3">Channel id:</p>
+              <Input type="text" id="channel-id" required />
+            </div>
           </div>
         {/if}
       </div>
