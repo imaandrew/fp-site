@@ -33,7 +33,8 @@
       switch (target.id) {
         case "fileInput":
           inputFile = f;
-          assignFileHash(f);
+          await assignFileHash(f);
+          handleVersionChange();
           break;
       }
     }
@@ -87,15 +88,15 @@
   };
 
   function handleVersionChange() {
-    if (tag === "") {
+    if (tag === "" || ver === "") {
       return;
     }
     switch (selectedPlatform) {
       case "n64":
-        outFileName = `${tag}.z64`;
+        outFileName = `${tag}-${ver}.z64`;
         break;
       case "wii":
-        outFileName = `${tag}.wad`;
+        outFileName = `${tag}-${ver}.wad`;
         break;
     }
   }
