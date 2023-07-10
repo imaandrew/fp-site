@@ -24,6 +24,7 @@
   let requiredPlatform: string = null;
   let selectedPlatform: string;
   let tagList = null;
+  let disableButton = true;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -138,6 +139,23 @@
     URL.revokeObjectURL(url);
   }
 
+  function blockBuild() {
+    if (ver === "unk" || ver == null || inputFile == null) {
+      disableButton = true;
+    } else if (tag === null || tag === "") {
+      disableButton = true;
+    } else if (outFileName === null || outFileName === "") {
+      disableButton = true;
+    } else if (
+      selectedPlatform === "wii" &&
+      (title === null || title === "" || channelId === null || channelId === "")
+    ) {
+      disableButton = true;
+    } else {
+      disableButton = false;
+    }
+  }
+
   const buildFp = () => {
     const outFile = getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
       patch_file: Uint8Array
@@ -171,7 +189,12 @@
     <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
     <div style="flex items-center">
       <Label for="fileInput" class="pb-2">{romHashMessage}</Label>
-      <Fileupload id="fileInput" class="mb-2" on:change={handleFileSelect} />
+      <Fileupload
+        id="fileInput"
+        class="mb-2"
+        on:change={handleFileSelect}
+        on:change={blockBuild}
+      />
       <Helper>Z64 or WAD.</Helper>
     </div>
 
@@ -182,12 +205,14 @@
         items={tagList !== null ? tagList : []}
         bind:value={tag}
         on:change={handleVersionChange}
+        on:change={blockBuild}
       />
     </div>
     <div class="platform-settings grid gap-1 mb-6 md:grid-cols-[100px_auto]">
       <ul
         class="flex flex-col justify-center gap-4"
         on:change={handleVersionChange}
+        on:change={blockBuild}
       >
         <li>
           <Radio
@@ -205,6 +230,7 @@
             bind:group={selectedPlatform}>Wii</Radio
           >
         </li>
+        <!--
         <li>
           <Radio
             name="platform"
@@ -222,11 +248,18 @@
             bind:group={selectedPlatform}>Switch</Radio
           >
         </li>
+      -->
       </ul>
       <div>
         <div class="flex items-center pb-5 whitespace-nowrap">
           <p class="text-left mr-3">Output file:</p>
-          <Input type="text" id="outfile" bind:value={outFileName} required />
+          <Input
+            type="text"
+            id="outfile"
+            bind:value={outFileName}
+            on:change={blockBuild}
+            required
+          />
         </div>
         {#if selectedPlatform === "wii"}
           <div transition:slide>
@@ -236,6 +269,7 @@
                 type="text"
                 id="channel-title"
                 bind:value={title}
+                on:change={blockBuild}
                 required
               />
             </div>
@@ -245,6 +279,7 @@
                 type="text"
                 id="channel-id"
                 bind:value={channelId}
+                on:change={blockBuild}
                 required
               />
             </div>
@@ -257,6 +292,7 @@
       color="greenToBlue"
       size="xl"
       class="w-1/3"
+      disabled={disableButton}
       on:click={() => buildFp()}>Build</GradientButton
     >
   </div>
