@@ -13,6 +13,7 @@
     Input,
     GradientButton,
     Checkbox,
+    Modal,
   } from "flowbite-svelte";
   import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
@@ -29,6 +30,7 @@
   let returnZip: boolean;
   let enableDarkFilter: boolean;
   let enableWidescreen: boolean;
+  let clickOutsideModal = false;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -234,7 +236,9 @@
   >
     <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
     <div style="flex items-center">
-      <Label for="fileInput" class="pb-2">{romHashMessage}</Label>
+      <Label for="fileInput" class="pb-2">{romHashMessage} <button id="b3" on:click={() => clickOutsideModal = true}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 ml-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg>
+        <span class="sr-only">Show file format information</span></button></Label>
       <Fileupload
         id="fileInput"
         class="mb-2"
@@ -243,6 +247,15 @@
       />
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
+
+    <Modal title="Input File Formats" bind:open={clickOutsideModal} autoclose outsideclose>
+      <h3 class="font-semibold text-gray-900 dark:text-white">N64</h3>
+          ROM must be in the Z64 format (big endian). If the file ends in .z64 but the patcher doesn't recognize it, it might be in a different format with the wrong extension. Try swapping it <a href="https://hack64.net/tools/swapper.php" target="_blank" class="text-primary-600 underline dark:text-primary-500 hover:no-underline">here</a>
+          <h3 class="font-semibold text-gray-900 dark:text-white">Wii</h3>
+          Must provide a WAD file. An N64 ROM doesn't need to be provided, the patcher will use the one in the WAD
+          <h3 class="font-semibold text-gray-900 dark:text-white">Wii U</h3>
+          Must provide the decrypted game data packed in either a ZIP or TAR file. The three folders, (code, content, meta) do not need to be in the root of the archive, but they must all be in the same folder
+    </Modal>
 
     <div class="flex items-center pb-5">
       <p class="text-left mr-3">Version:</p>
