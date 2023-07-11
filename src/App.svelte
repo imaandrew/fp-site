@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getTags } from "./lib/github";
-  import { getMd5 } from "./lib/md5";
+  import { getTags, getCrc, getS3File, readFileAsUint8Array } from "./lib/util";
   import { n64_decode, wii_inject, wiiu_inject } from "fp-web-patcher";
   import { slide } from "svelte/transition";
   import {
@@ -15,7 +14,6 @@
     Checkbox,
     Modal,
   } from "flowbite-svelte";
-  import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
   let ver: string;
   let tag: string;
@@ -54,20 +52,21 @@
 
   const assignFileHash = async (file: File) => {
     try {
-      switch (await getMd5(file)) {
-        case "a722f8161ff489943191330bf8416496":
+      const crc = await getCrc(file);
+      switch (crc) {
+        case 0xa7f5cd7e:
           ver = "us";
           romHashMessage = "Valid US ROM";
           requiredPlatform = "n64";
           selectedPlatform = "n64";
           break;
-        case "df54f17fb84fb5b5bcf6aa9af65b0942":
+        case 0xbd60ca66:
           ver = "jp";
           romHashMessage = "Valid JP ROM";
           requiredPlatform = "n64";
           selectedPlatform = "n64";
           break;
-        case "2aad94a7fa5f05c7544ddc0dd269c366":
+        case 0xd469a9e1:
           ver = "us";
           romHashMessage = "Valid US WAD";
           requiredPlatform = "wii";
@@ -75,7 +74,7 @@
           channelId = "FPUS";
           title = "fp-US";
           break;
-        case "161563b6cf9ba5ca22306a729896f47d":
+        case 0x6566e39a:
           ver = "jp";
           romHashMessage = "Valid JP WAD";
           requiredPlatform = "wii";
@@ -97,6 +96,7 @@
           } else {
             ver = "unk";
             romHashMessage = "Unknown base file";
+            console.log(+crc.toString(16));
           }
           break;
       }
@@ -129,24 +129,6 @@
     selectedPlatform = "n64";
     getTagList();
   });
-
-  function readFileAsUint8Array(file: File): Promise<Uint8Array> {
-    return new Promise<Uint8Array>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const arrayBuffer = event.target?.result as ArrayBuffer;
-        const uint8Array = new Uint8Array(arrayBuffer);
-        resolve(uint8Array);
-      };
-
-      reader.onerror = (event) => {
-        reject(event.target?.error);
-      };
-
-      reader.readAsArrayBuffer(file);
-    });
-  }
 
   // https://stackoverflow.com/a/62176999
   function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
@@ -236,9 +218,23 @@
   >
     <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
     <div style="flex items-center">
-      <Label for="fileInput" class="pb-2">{romHashMessage} <button id="b3" on:click={() => clickOutsideModal = true}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 ml-1"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" /></svg>
-        <span class="sr-only">Show file format information</span></button></Label>
+      <Label for="fileInput" class="pb-2"
+        >{romHashMessage}
+        <button id="b3" on:click={() => (clickOutsideModal = true)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-4 h-4 ml-1"
+            ><path
+              fill-rule="evenodd"
+              d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z"
+              clip-rule="evenodd"
+            /></svg
+          >
+          <span class="sr-only">Show file format information</span></button
+        ></Label
+      >
       <Fileupload
         id="fileInput"
         class="mb-2"
@@ -248,13 +244,28 @@
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
 
-    <Modal title="Input File Formats" bind:open={clickOutsideModal} autoclose outsideclose>
+    <Modal
+      title="Input File Formats"
+      bind:open={clickOutsideModal}
+      autoclose
+      outsideclose
+    >
       <h3 class="font-semibold text-gray-900 dark:text-white">N64</h3>
-          ROM must be in the Z64 format (big endian). If the file ends in .z64 but the patcher doesn't recognize it, it might be in a different format with the wrong extension. Try swapping it <a href="https://hack64.net/tools/swapper.php" target="_blank" class="text-primary-600 underline dark:text-primary-500 hover:no-underline">here</a>
-          <h3 class="font-semibold text-gray-900 dark:text-white">Wii</h3>
-          Must provide a WAD file. An N64 ROM doesn't need to be provided, the patcher will use the one in the WAD
-          <h3 class="font-semibold text-gray-900 dark:text-white">Wii U</h3>
-          Must provide the decrypted game data packed in either a ZIP or TAR file. The three folders, (code, content, meta) do not need to be in the root of the archive, but they must all be in the same folder
+      ROM must be in the Z64 format (big endian). If the file ends in .z64 but the
+      patcher doesn't recognize it, it might be in a different format with the wrong
+      extension. Try swapping it<a
+        href="https://hack64.net/tools/swapper.php"
+        target="_blank"
+        class="text-primary-600 underline dark:text-primary-500 hover:no-underline"
+        >here</a
+      >
+      <h3 class="font-semibold text-gray-900 dark:text-white">Wii</h3>
+      Must provide a WAD file. An N64 ROM doesn't need to be provided, the patcher
+      will use the one in the WAD
+      <h3 class="font-semibold text-gray-900 dark:text-white">Wii U</h3>
+      Must provide the decrypted game data packed in either a ZIP or TAR file. The
+      three folders, (code, content, meta) do not need to be in the root of the archive,
+      but they must all be in the same folder
     </Modal>
 
     <div class="flex items-center pb-5">
@@ -347,8 +358,18 @@
         {#if selectedPlatform === "wiiu"}
           <div transition:slide class="space-y-4">
             <div class="flex gap-5">
-              <Radio name="version" value="us" bind:group={ver} on:change={handleVersionChange}>US</Radio>
-              <Radio name="version" value="jp" bind:group={ver} on:change={handleVersionChange}>JP</Radio>
+              <Radio
+                name="version"
+                value="us"
+                bind:group={ver}
+                on:change={handleVersionChange}>US</Radio
+              >
+              <Radio
+                name="version"
+                value="jp"
+                bind:group={ver}
+                on:change={handleVersionChange}>JP</Radio
+              >
             </div>
             <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
             <Checkbox bind:checked={enableWidescreen}>Widescreen</Checkbox>
