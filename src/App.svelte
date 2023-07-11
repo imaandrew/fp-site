@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { getTags } from "./lib/github";
   import { getMd5 } from "./lib/md5";
-  import { n64_decode, wii_inject } from "fp-web-patcher";
+  import { n64_decode, wii_inject, wiiu_inject } from "fp-web-patcher";
   import { slide } from "svelte/transition";
   import {
     Fileupload,
@@ -12,6 +12,7 @@
     Radio,
     Input,
     GradientButton,
+    Checkbox,
   } from "flowbite-svelte";
   import { getS3File } from "./lib/get_s3_file";
   let inputFile: File;
@@ -21,10 +22,13 @@
   let title: string;
   let romHashMessage = "Choose base file";
   let outFileName: string;
-  let requiredPlatform: string = null;
+  let requiredPlatform: string;
   let selectedPlatform: string;
   let tagList = null;
   let disableButton = true;
+  let returnZip: boolean;
+  let enableDarkFilter: boolean;
+  let enableWidescreen: boolean;
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -78,8 +82,20 @@
           title = "fp-JP";
           break;
         default:
-          ver = "unk";
-          romHashMessage = "Unknown base file";
+          if (file.name.split(".").pop() === "zip") {
+            romHashMessage = "Wii U Archive";
+            requiredPlatform = "wiiu";
+            selectedPlatform = "wiiu";
+            returnZip = true;
+          } else if (file.name.split(".").pop() === "tar") {
+            romHashMessage = "Wii U Archive";
+            requiredPlatform = "wiiu";
+            selectedPlatform = "wiiu";
+            returnZip = false;
+          } else {
+            ver = "unk";
+            romHashMessage = "Unknown base file";
+          }
           break;
       }
     } catch (error) {
@@ -88,7 +104,7 @@
   };
 
   function handleVersionChange() {
-    if (tag === "" || ver === "") {
+    if (tag === "" || ver === "" || outFileName === "") {
       return;
     }
     switch (selectedPlatform) {
@@ -98,6 +114,12 @@
       case "wii":
         outFileName = `${tag}-${ver}.wad`;
         break;
+      case "wiiu":
+        if (returnZip) {
+          outFileName = `${tag}-${ver}.zip`;
+        } else {
+          outFileName = `${tag}-${ver}.tar`;
+        }
     }
   }
 
@@ -141,7 +163,7 @@
   }
 
   function blockBuild() {
-    if (ver === "unk" || ver == null || inputFile == null) {
+    if (ver === "unk" || ver == null || inputFile === null) {
       disableButton = true;
     } else if (tag === null || tag === "") {
       disableButton = true;
@@ -159,21 +181,44 @@
 
   const buildFp = () => {
     const outFile = getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
-      patch_file: Uint8Array
+      patchFile: Uint8Array
     ) {
       const input = await readFileAsUint8Array(inputFile);
       if (selectedPlatform === "n64") {
-        return n64_decode(input, patch_file);
+        return n64_decode(input, patchFile);
       } else if (selectedPlatform === "wii") {
         const memPatch = await getS3File(`gzi/mem_patch.gzi`);
         const settings = {
           wad: input,
-          xdelta_patch: patch_file,
+          xdelta_patch: patchFile,
           gzi_patch: memPatch,
           channel_id: channelId,
           title: title,
         };
         return wii_inject(settings);
+      } else if (selectedPlatform === "wiiu") {
+        const config = await getS3File(`wiiu/${ver}.ini`);
+        let frameLayout: Uint8Array;
+        if (enableWidescreen && enableDarkFilter) {
+          frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
+        } else if (enableDarkFilter) {
+          frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
+        } else if (enableWidescreen) {
+          frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
+        } else {
+          frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
+        }
+        const settings = {
+          input_archive: input,
+          xdelta_patch: patchFile,
+          enable_dark_filter: enableDarkFilter,
+          enable_widescreen: enableWidescreen,
+          name: `fp-${tag}-${ver}`,
+          config: config,
+          return_zip: returnZip,
+          frame_layout: frameLayout,
+        };
+        return wiiu_inject(settings);
       }
     });
 
@@ -196,7 +241,7 @@
         on:change={handleFileSelect}
         on:change={blockBuild}
       />
-      <Helper>Z64 or WAD.</Helper>
+      <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
 
     <div class="flex items-center pb-5">
@@ -219,7 +264,7 @@
           <Radio
             name="platform"
             value="n64"
-            disabled={requiredPlatform !== null && requiredPlatform !== "n64"}
+            disabled={requiredPlatform !== "n64"}
             bind:group={selectedPlatform}>N64</Radio
           >
         </li>
@@ -227,19 +272,19 @@
           <Radio
             name="platform"
             value="wii"
-            disabled={requiredPlatform !== null && requiredPlatform !== "wii"}
+            disabled={requiredPlatform !== "wii"}
             bind:group={selectedPlatform}>Wii</Radio
           >
         </li>
-        <!--
         <li>
           <Radio
             name="platform"
             value="wiiu"
-            disabled={requiredPlatform !== null && requiredPlatform !== "wiiu"}
+            disabled={requiredPlatform !== "wiiu"}
             bind:group={selectedPlatform}>Wii U</Radio
           >
         </li>
+        <!--
         <li>
           <Radio
             name="platform"
@@ -284,6 +329,16 @@
                 required
               />
             </div>
+          </div>
+        {/if}
+        {#if selectedPlatform === "wiiu"}
+          <div transition:slide class="space-y-4">
+            <div class="flex gap-5">
+              <Radio name="version" value="us" bind:group={ver} on:change={handleVersionChange}>US</Radio>
+              <Radio name="version" value="jp" bind:group={ver} on:change={handleVersionChange}>JP</Radio>
+            </div>
+            <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
+            <Checkbox bind:checked={enableWidescreen}>Widescreen</Checkbox>
           </div>
         {/if}
       </div>
