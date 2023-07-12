@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getTags, getCrc, getS3File, readFileAsUint8Array } from "./lib/util";
-  import { n64_decode, wii_inject, wiiu_inject } from "fp-web-patcher";
   import { slide } from "svelte/transition";
+  import { writable } from "svelte/store";
   import {
     Fileupload,
     Label,
@@ -13,6 +13,7 @@
     GradientButton,
     Checkbox,
     Modal,
+    Spinner,
   } from "flowbite-svelte";
   let inputFile: File;
   let ver: string;
@@ -29,6 +30,8 @@
   let enableDarkFilter: boolean;
   let enableWidescreen: boolean;
   let clickOutsideModal = false;
+  let showLoading = false;
+  let buttonText = writable("Build");
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -163,13 +166,37 @@
     }
   }
 
+  function savePatchedFile(event: MessageEvent<Uint8Array>) {
+    const { data } = event;
+    saveUint8ArrayToFile(data, outFileName);
+    buttonText.set("Build");
+    showLoading = false;
+    disableButton = false;
+  }
+
   const buildFp = () => {
-    const outFile = getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
+    buttonText.set("Building...");
+    showLoading = true;
+    disableButton = true;
+    getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
       patchFile: Uint8Array
     ) {
       const input = await readFileAsUint8Array(inputFile);
       if (selectedPlatform === "n64") {
-        return n64_decode(input, patchFile);
+        const worker = new Worker(
+          new URL("./lib/worker_n64", import.meta.url),
+          { type: "module" }
+        );
+
+        worker.onmessage = function (event) {
+          savePatchedFile(event);
+          worker.terminate();
+        };
+
+        worker.postMessage({
+          input: input,
+          patch: patchFile,
+        });
       } else if (selectedPlatform === "wii") {
         const memPatch = await getS3File(`gzi/mem_patch.gzi`);
         const settings = {
@@ -179,7 +206,18 @@
           channel_id: channelId,
           title: title,
         };
-        return wii_inject(settings);
+
+        const worker = new Worker(
+          new URL("./lib/worker_wii", import.meta.url),
+          { type: "module" }
+        );
+
+        worker.onmessage = function (event) {
+          savePatchedFile(event);
+          worker.terminate();
+        };
+
+        worker.postMessage(settings);
       } else if (selectedPlatform === "wiiu") {
         const config = await getS3File(`wiiu/${ver}.ini`);
         let frameLayout: Uint8Array;
@@ -202,12 +240,19 @@
           return_zip: returnZip,
           frame_layout: frameLayout,
         };
-        return wiiu_inject(settings);
-      }
-    });
 
-    outFile.then(function (file: Uint8Array) {
-      saveUint8ArrayToFile(file, outFileName);
+        const worker = new Worker(
+          new URL("./lib/worker_wiiu", import.meta.url),
+          { type: "module" }
+        );
+
+        worker.onmessage = function (event) {
+          savePatchedFile(event);
+          worker.terminate();
+        };
+
+        worker.postMessage(settings);
+      }
     });
   };
 </script>
@@ -216,7 +261,7 @@
   <div
     class="container flex flex-col items-center justify-center border border-sky-500 rounded max-w-md p-8 dark:text-white"
   >
-    <h1 class="text-4xl pb-8 font-bold">fp patcher</h1>
+    <h1 class="text-4xl pb-8 font-bold">fp web patcher</h1>
     <div style="flex items-center">
       <Label for="fileInput" class="pb-2"
         >{romHashMessage}
@@ -377,13 +422,23 @@
         {/if}
       </div>
     </div>
-    <GradientButton
-      type="submit"
-      color="greenToBlue"
-      size="xl"
-      class="w-1/3"
-      disabled={disableButton}
-      on:click={() => buildFp()}>Build</GradientButton
-    >
+    <div class="grid grid-cols-5 gap-4 items-center auto-cols-max">
+      <div />
+      <GradientButton
+        type="submit"
+        color="greenToBlue"
+        size="xl"
+        class="col-span-3"
+        disabled={disableButton}
+        on:click={() => buildFp()}
+      >
+        {$buttonText}
+      </GradientButton>
+      <Spinner
+        class="mr-3 {showLoading ? '' : 'invisible'}"
+        size="4"
+        color="green"
+      />
+    </div>
   </div>
 </main>
