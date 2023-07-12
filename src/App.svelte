@@ -298,7 +298,10 @@
       <h3 class="font-semibold text-gray-900 dark:text-white">N64</h3>
       ROM must be in the Z64 format (big endian). If the file ends in .z64 but the
       patcher doesn't recognize it, it might be in a different format with the wrong
-      extension. Try swapping it<a
+      extension. Try swapping it
+      <!-- prettier-ignore -->
+
+      <a
         href="https://hack64.net/tools/swapper.php"
         target="_blank"
         class="text-primary-600 underline dark:text-primary-500 hover:no-underline"
