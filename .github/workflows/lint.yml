@@ -16,8 +16,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
-        with:
-          cache: "yarn"
 
       - name: Install Dependencies
         run: yarn install --immutable
