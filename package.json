@@ -7,12 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "lint": "yarn eslint src",
-    "lint:fix": "yarn run lint --fix",
-    "pretty": "yarn prettier src --check",
-    "pretty:fix": "yarn run pretty --write",
-    "format": "yarn run pretty:fix && yarn run lint:fix"
+    "lint": "yarn lint:eslint && yarn lint:prettier && yarn lint:svelte",
+    "lint:eslint": "yarn eslint src",
+    "lint:prettier": "yarn prettier src --check",
+    "lint:svelte": "svelte-check --tsconfig ./tsconfig.json",
+    "fix": "yarn fix:prettier && yarn fix:eslint",
+    "fix:eslint": "yarn lint:eslint --fix",
+    "fix:prettier": "yarn lint:prettier --write"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
