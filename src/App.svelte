@@ -198,13 +198,26 @@
           patch: patchFile,
         });
       } else if (selectedPlatform === "wii") {
-        const memPatch = await getS3File(`gzi/mem_patch.gzi`);
+        const memPatch = await getS3File("gzi/mem_patch.gzi");
+        const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
+        const hbBin = await getS3File(`hb/${ver}.bin`);
+        const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
+        concatPatch.set(memPatch, 0);
+        concatPatch[memPatch.length - 1] = 10;
+        concatPatch.set(hbPatch, memPatch.length);
+        const dolPatch = {
+          dol_num: 1,
+          load_addr: 0x90000800,
+          data: hbBin
+        };
+
         const settings = {
           wad: input,
           xdelta_patch: patchFile,
-          gzi_patch: memPatch,
+          gzi_patch: concatPatch,
           channel_id: channelId,
           title: title,
+          dol_patch: dolPatch,
         };
 
         const worker = new Worker(
