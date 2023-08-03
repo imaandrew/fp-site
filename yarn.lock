@@ -2249,10 +2249,10 @@ for-each@^0.3.3:
   dependencies:
     is-callable "^1.1.3"
 
-fp-web-patcher@^0.3.1:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/fp-web-patcher/-/fp-web-patcher-0.3.2.tgz#08d95c9e0a0f3c0f03f9dbdfe53e956ed7bf9fcd"
-  integrity sha512-gdCPgKeAk19l6aH5CNVC+C2oFzpvF0AGzZaY6mYIKK3AnML5Tk8k/WxUT25RkpPUCsZbxZx6BKC5qq5lozgr3A==
+fp-web-patcher@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/fp-web-patcher/-/fp-web-patcher-0.4.0.tgz#57102e16f8449ae4f50224b2206f6e6c05a4cb7c"
+  integrity sha512-e47HLQNbdOX1kzskkVYX77PIKFjOp2K81GeMyb+y/809Q0Qg8bduDKC1f82LmWePhHyCkiYoZ667I97vuNSl+Q==
 
 fraction.js@^4.2.0:
   version "4.2.0"
