@@ -2238,9 +2238,9 @@ flatted@^3.1.0:
   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
 
 flowbite-svelte@^0.43.0:
-  version "0.43.2"
-  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.43.2.tgz#41c1511ca786ba4067518fe09dcef2606128aa14"
-  integrity sha512-RbxrGjFJM/D+4OyQJw/VA8UXpDavf+lgBiGJSgxQSfKMVQwnE8s3azkSB9ix1YzZjUNgL0o2yZsVMgHxcUJczA==
+  version "0.43.3"
+  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.43.3.tgz#71acdb07f7964cd22a75849b5091ec759f80b0a0"
+  integrity sha512-yxaBPT/TEZe8g5JQ/O8Tuw1FGz3OYOwPwGdnMxe3laACPgnFnc2fJsWVqvrgxnH0J5lOdfVy9/0XwmDsv/RRgQ==
   dependencies:
     "@floating-ui/dom" "^1.5.1"
     flowbite "^1.8.1"
