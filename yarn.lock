@@ -1458,6 +1458,11 @@
     "@typescript-eslint/types" "6.5.0"
     eslint-visitor-keys "^3.4.1"
 
+"@yr/monotone-cubic-spline@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@yr/monotone-cubic-spline/-/monotone-cubic-spline-1.0.3.tgz#7272d89f8e4f6fb7a1600c28c378cc18d3b577b9"
+  integrity sha512-FQXkOta0XBSUPHndIKON2Y9JeQz5ZeMqLYZVVK93FliNBFm7LNMIZmY6FrMEB9XPcDbE2bekMbZD6kzDkxwYjA==
+
 acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
@@ -1503,11 +1508,12 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-apexcharts@^3.41.1:
-  version "3.41.1"
-  resolved "https://registry.yarnpkg.com/apexcharts/-/apexcharts-3.41.1.tgz#69669ae6225d4e7a32bdfd9750157e236d56b6e6"
-  integrity sha512-kta8fhXrfZYqW7K9kF7FqZ6imQaC6moyRgcUZjwIky/oeHVVISSN/2rjUIvZXnwxWHiSdDHMqLy+TqJhB4DXFA==
+apexcharts@^3.42.0:
+  version "3.42.0"
+  resolved "https://registry.yarnpkg.com/apexcharts/-/apexcharts-3.42.0.tgz#143eb4a12d93c59a37dd88efcf0c7ed0d9ab8735"
+  integrity sha512-hYhzZqh2Efny9uiutkGU2M/EarJ4Nn8s6dxZ0C7E7N+SV4d1xjTioXi2NLn4UKVJabZkb3HnpXDoumXgtAymwg==
   dependencies:
+    "@yr/monotone-cubic-spline" "^1.0.3"
     svg.draggable.js "^2.2.2"
     svg.easing.js "^2.0.0"
     svg.filter.js "^2.0.2"
@@ -2238,12 +2244,12 @@ flatted@^3.2.7:
   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
 
 flowbite-svelte@^0.44.0:
-  version "0.44.2"
-  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.44.2.tgz#6ee80c62f6a65bca0d09adcd73d587d51d70218c"
-  integrity sha512-dm3msokTfV4PPgADC6dV+LObWb55ZO/nJzEG90UXJO48KjdrDYI4BiVQQlqdMl6Z5+yQ+J2s89tvAUPC4/3hBA==
+  version "0.44.5"
+  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.44.5.tgz#ba6b0cba1fb4bc3afb13e03fda669fb5fb33032f"
+  integrity sha512-yNvV5YPB6E8HUPutFAdCmz2L2ZD6BGX4nWA0lfzILlhn0qGJkQsgpuzGFD//2IUs766gpnU9LtXUDHMmxk92SQ==
   dependencies:
     "@floating-ui/dom" "^1.5.1"
-    apexcharts "^3.41.1"
+    apexcharts "^3.42.0"
     flowbite "^1.8.1"
     tailwind-merge "^1.14.0"
 
