@@ -24,7 +24,7 @@
   let outFileName: string;
   let requiredPlatform: string;
   let selectedPlatform: string;
-  let tagList = null;
+  let tagList = [{ name: "", value: "" }];
   let disableButton = true;
   let returnZip: boolean;
   let enableDarkFilter: boolean;
@@ -35,6 +35,9 @@
 
   const handleFileSelect = async (event: Event) => {
     const target = event.target as HTMLInputElement;
+    if (!target.files) {
+      return;
+    }
     const f = target.files[0];
     if (f) {
       switch (target.id) {
@@ -208,7 +211,7 @@
         const dolPatch = {
           dol_num: 1,
           load_addr: 0x90000800,
-          data: hbBin
+          data: hbBin,
         };
 
         const settings = {
