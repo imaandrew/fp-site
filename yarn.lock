@@ -2255,9 +2255,9 @@ flatted@^3.2.7:
   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
 
 flowbite-svelte@^0.44.0:
-  version "0.44.6"
-  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.44.6.tgz#e4243477fd91e5fe6a23f5f81e382f8430de2269"
-  integrity sha512-uBtX4NTaiST2tPi0Hbc1ExN4/+dAdaLeSi9lZfNqAsIop9Kxws98gMLRzvEH6hUSR3Ye75S51hVaTk93h0LjVA==
+  version "0.44.15"
+  resolved "https://registry.yarnpkg.com/flowbite-svelte/-/flowbite-svelte-0.44.15.tgz#b0b0787a572f2f6b543bfc8a509ee08cd2afedea"
+  integrity sha512-tUCWslwcTTsFhmz74dIPZbpnzzjuTpJ1tMlgMo75uqAOBQxIL52ZXSzOt6WA74ECCaU5ZTvc2jSMfxAH4BwHoQ==
   dependencies:
     "@floating-ui/dom" "^1.5.1"
     apexcharts "^3.42.0"
