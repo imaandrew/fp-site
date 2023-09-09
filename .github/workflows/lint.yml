@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           yarn set version stable
-          yarn install --immutable
+          yarn install
 
       - name: Lint ESLint
         run: yarn lint:eslint
