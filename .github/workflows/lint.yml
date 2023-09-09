@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Install Dependencies
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: yarn install --immutable
 
       - name: Lint ESLint
         run: yarn lint:eslint
