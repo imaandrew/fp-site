@@ -18,13 +18,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
 
-      - name: Update Yarn
-        run: |
-          corepack enable
-          yarn set version stable
-
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --immutable --immutable-cache --check-cache
 
       - name: Lint ESLint
         run: yarn lint:eslint
