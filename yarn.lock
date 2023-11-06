@@ -3009,6 +3009,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-compat-utils@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "eslint-compat-utils@npm:0.1.2"
+  peerDependencies:
+    eslint: ">=6.0.0"
+  checksum: 2315d9db81efb7f58808053bf32a1d5970b38e01cd8244f4f1b5aa05d883255c5c93fc184e9c29a0e7e2dcf16ff16330977302474d3fa870e41c5bed9c66f76b
+  languageName: node
+  linkType: hard
+
 "eslint-config-prettier@npm:^9.0.0":
   version: 9.0.0
   resolution: "eslint-config-prettier@npm:9.0.0"
@@ -3021,12 +3030,13 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-svelte@npm:^2.30.0":
-  version: 2.34.1
-  resolution: "eslint-plugin-svelte@npm:2.34.1"
+  version: 2.35.0
+  resolution: "eslint-plugin-svelte@npm:2.35.0"
   dependencies:
     "@eslint-community/eslint-utils": ^4.2.0
     "@jridgewell/sourcemap-codec": ^1.4.14
     debug: ^4.3.1
+    eslint-compat-utils: ^0.1.2
     esutils: ^2.0.3
     known-css-properties: ^0.29.0
     postcss: ^8.4.5
@@ -3041,7 +3051,7 @@ __metadata:
   peerDependenciesMeta:
     svelte:
       optional: true
-  checksum: 76beef349eea397c672daa9a538b901a0af0542d7867b3c177438817d1b28fdc77e5a5c50ad96d8e7e3a8445ba019be5db8e1c5b0995c2198d37cf0584f960bc
+  checksum: 70520937395caa403d206e8a77095f191cca9448d956c0dff3219446b1019289fd1cbc5f5448c25653357537265c17136e48da9021336e9f480ce07a4332dcc6
   languageName: node
   linkType: hard
 
