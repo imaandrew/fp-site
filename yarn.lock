@@ -1719,8 +1719,8 @@ __metadata:
   linkType: hard
 
 "@sveltejs/vite-plugin-svelte@npm:^2.4.2":
-  version: 2.5.0
-  resolution: "@sveltejs/vite-plugin-svelte@npm:2.5.0"
+  version: 2.5.1
+  resolution: "@sveltejs/vite-plugin-svelte@npm:2.5.1"
   dependencies:
     "@sveltejs/vite-plugin-svelte-inspector": ^1.0.4
     debug: ^4.3.4
@@ -1732,7 +1732,7 @@ __metadata:
   peerDependencies:
     svelte: ^3.54.0 || ^4.0.0 || ^5.0.0-next.0
     vite: ^4.0.0
-  checksum: 9949983d8a708b1f5eaa92fee0b14e55034c89faab612086c2f75cd9694aa9fc11fc5254c341b51c3ea0aafb6cb0850f3f7471b9fc7bcabd81b48fdb064ce3cd
+  checksum: 0c6e223e02261179a3f37d7ffa722d10dfb625ce658ea31fdf7e742a2f6c7d97900b05c8f1beb81f269df0f3d1860be310636ad44423ccaeb1aa36b7eae3a787
   languageName: node
   linkType: hard
 
