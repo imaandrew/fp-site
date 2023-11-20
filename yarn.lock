@@ -699,6 +699,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.23.1":
+  version: 7.23.2
+  resolution: "@babel/runtime@npm:7.23.2"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: 6c4df4839ec75ca10175f636d6362f91df8a3137f86b38f6cd3a4c90668a0fe8e9281d320958f4fbd43b394988958585a17c3aab2a4ea6bf7316b22916a371fb
+  languageName: node
+  linkType: hard
+
 "@esbuild/android-arm64@npm:0.18.20":
   version: 0.18.20
   resolution: "@esbuild/android-arm64@npm:0.18.20"
@@ -2200,9 +2209,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"apexcharts@npm:^3.42.0":
-  version: 3.42.0
-  resolution: "apexcharts@npm:3.42.0"
+"apexcharts@npm:^3.44.0":
+  version: 3.44.0
+  resolution: "apexcharts@npm:3.44.0"
   dependencies:
     "@yr/monotone-cubic-spline": ^1.0.3
     svg.draggable.js: ^2.2.2
@@ -2211,7 +2220,7 @@ __metadata:
     svg.pathmorphing.js: ^0.1.3
     svg.resize.js: ^1.4.3
     svg.select.js: ^3.0.1
-  checksum: e29ce35d9b8ad8c06fbda6b0350337ee7ccbd540bc08d5edb73dcaa97295340ca00509159a5be70273a25cd0a910e44bf08b71e5d37909ff5d26f0d7c825cbd5
+  checksum: a41f310c17081bb8b81361b67bff8da82cfdd8baed8c1a9892dd4c1b4cf63b4b58f28f74fb1a88b463492fed0286123c9fbbd5364a1d1024c8ec43f156961f23
   languageName: node
   linkType: hard
 
@@ -3318,26 +3327,36 @@ __metadata:
   linkType: hard
 
 "flowbite-svelte@npm:^0.44.0":
-  version: 0.44.18
-  resolution: "flowbite-svelte@npm:0.44.18"
+  version: 0.44.19
+  resolution: "flowbite-svelte@npm:0.44.19"
   dependencies:
     "@floating-ui/dom": ^1.5.3
-    apexcharts: ^3.42.0
-    flowbite: ^1.8.1
-    tailwind-merge: ^1.14.0
+    apexcharts: ^3.44.0
+    flowbite: ^2.0.0
+    tailwind-merge: ^2.0.0
   peerDependencies:
     svelte: ^4.0.0
-  checksum: 0a29da86d819cd744f8aa0d038c21fbad4def9ca8dcd817b36debcafafec3bf78296010adf6ec3d1b336062fed929d9a3712a4f6911436f7f75211d28e4e6517
+  checksum: ebd916bf9b37a6841dd8efe17a27556c2790e68b33df689d7569e5577f713ef9ca69e9307e18b7bc76e550a8e304b92b8fea8097296ef3865ffff19f464bff75
   languageName: node
   linkType: hard
 
-"flowbite@npm:^1.6.6, flowbite@npm:^1.8.1":
+"flowbite@npm:^1.6.6":
   version: 1.8.1
   resolution: "flowbite@npm:1.8.1"
   dependencies:
     "@popperjs/core": ^2.9.3
     mini-svg-data-uri: ^1.4.3
   checksum: 51fa33656082ae15e66fefdf595d76cad4e7d80795d5c4174e4cfcb56bd03d867a11d42fe83a6adc1272a895edd657a76b6bdad8ccf86781d9bf34a85c516525
+  languageName: node
+  linkType: hard
+
+"flowbite@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "flowbite@npm:2.1.1"
+  dependencies:
+    "@popperjs/core": ^2.9.3
+    mini-svg-data-uri: ^1.4.3
+  checksum: a55d33996dc4ee50a08c67e9d47de506ffa1c4ad63ec1f43fee3369b5f8a5d9179c6060042cabfc03d4f246ac657e1acfaf49b222f84bd9abf403056cdbdb734
   languageName: node
   linkType: hard
 
@@ -5230,6 +5249,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"regenerator-runtime@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "regenerator-runtime@npm:0.14.0"
+  checksum: 1c977ad82a82a4412e4f639d65d22be376d3ebdd30da2c003eeafdaaacd03fc00c2320f18120007ee700900979284fc78a9f00da7fb593f6e6eeebc673fba9a3
+  languageName: node
+  linkType: hard
+
 "resolve-from@npm:^4.0.0":
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
@@ -5836,10 +5862,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^1.13.2, tailwind-merge@npm:^1.14.0":
+"tailwind-merge@npm:^1.13.2":
   version: 1.14.0
   resolution: "tailwind-merge@npm:1.14.0"
   checksum: 8cf5d37f51b3b32e4bdd5544feaed34357bfba2f64f14834cc4a21ac29b0ae22d7255386467a0f1dadb3e38499389efbbabeddcd0b16571af5a0d346a4921877
+  languageName: node
+  linkType: hard
+
+"tailwind-merge@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "tailwind-merge@npm:2.0.0"
+  dependencies:
+    "@babel/runtime": ^7.23.1
+  checksum: f6ed8086c2378c26fb9a8c6d1dace2252ebb1d9858c868968e87be1c0248980b436d07cfdb7ab9368a22508705958b3c24330cd6d8c7801df42f57c080cc2fb2
   languageName: node
   linkType: hard
 
