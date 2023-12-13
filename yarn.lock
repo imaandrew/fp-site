@@ -123,13 +123,13 @@ __metadata:
   linkType: hard
 
 "@aws-sdk/client-s3@npm:^3.358.0":
-  version: 3.472.0
-  resolution: "@aws-sdk/client-s3@npm:3.472.0"
+  version: 3.473.0
+  resolution: "@aws-sdk/client-s3@npm:3.473.0"
   dependencies:
     "@aws-crypto/sha1-browser": 3.0.0
     "@aws-crypto/sha256-browser": 3.0.0
     "@aws-crypto/sha256-js": 3.0.0
-    "@aws-sdk/client-sts": 3.470.0
+    "@aws-sdk/client-sts": 3.473.0
     "@aws-sdk/core": 3.468.0
     "@aws-sdk/credential-provider-node": 3.470.0
     "@aws-sdk/middleware-bucket-endpoint": 3.470.0
@@ -183,7 +183,7 @@ __metadata:
     "@smithy/util-waiter": ^2.0.15
     fast-xml-parser: 4.2.5
     tslib: ^2.5.0
-  checksum: 99971908a9da93e5f21e634ee8464686932f6056b053e26d07ee0c217d5b56440616202743c2f0c0f67234e0264fb88a309fee689aa92108a8108b384a9eb117
+  checksum: b2828fc36f80107de074ab9d930b2fe0bc8505b12ec35ccc31f34885f6283eead4fdef7b79b39f14f821f68645bd28eb1b9bf331e5b84bcb25a95318d04c63ea
   languageName: node
   linkType: hard
 
@@ -231,9 +231,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/client-sts@npm:3.470.0":
-  version: 3.470.0
-  resolution: "@aws-sdk/client-sts@npm:3.470.0"
+"@aws-sdk/client-sts@npm:3.473.0":
+  version: 3.473.0
+  resolution: "@aws-sdk/client-sts@npm:3.473.0"
   dependencies:
     "@aws-crypto/sha256-browser": 3.0.0
     "@aws-crypto/sha256-js": 3.0.0
@@ -275,7 +275,7 @@ __metadata:
     "@smithy/util-utf8": ^2.0.2
     fast-xml-parser: 4.2.5
     tslib: ^2.5.0
-  checksum: 70159cb477a8dd42687d8b4064cdce8b324cccb51b16dfbe98bc239648a9dfd6e10093c26a44761493d3fdde7af2cac5b90fe61f3353141b4e66a211d4e8cd70
+  checksum: 7c73dd34a67bf1e57676426c5375b4d45065f03a0c30f4241a27198221b1363e95784b3b70d62b782aa68c7cb258e99367e6f84dff20a47dc5362b2acbe64adb
   languageName: node
   linkType: hard
 
