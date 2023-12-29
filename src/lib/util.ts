@@ -8,13 +8,13 @@ export async function getS3File(path: string): Promise<Uint8Array> {
   return uint8Array;
 }
 
-export async function getTags(): Promise<string[]> {
+export async function getLatestTag(): Promise<string> {
   console.log("making request");
   const response = await fetch(
     "https://api.github.com/repos/jcog/fp/git/refs/tags",
   );
   const data = await response.json();
-  return data.map((item: { ref: string }) => item.ref.split("/").pop());
+  return data[data.length - 1].ref.split("/").pop();
 }
 
 export async function getCrc(file: File): Promise<number> {

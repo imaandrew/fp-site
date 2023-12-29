@@ -1,13 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getTags, getCrc, getS3File, readFileAsUint8Array } from "./lib/util";
+  import {
+    getLatestTag,
+    getCrc,
+    getS3File,
+    readFileAsUint8Array,
+  } from "./lib/util";
   import { slide } from "svelte/transition";
   import { writable } from "svelte/store";
   import {
     Fileupload,
     Label,
     Helper,
-    Select,
     Radio,
     Input,
     GradientButton,
@@ -22,9 +26,7 @@
   let title: string;
   let romHashMessage = "Choose base file";
   let outFileName: string;
-  let requiredPlatform: string;
-  let selectedPlatform: string;
-  let tagList = [{ name: "", value: "" }];
+  let platform: string;
   let disableButton = true;
   let returnZip: boolean;
   let enableDarkFilter: boolean;
@@ -45,14 +47,15 @@
           inputFile = f;
           await assignFileHash(f);
           handleVersionChange();
+          blockBuild();
           break;
       }
     }
   };
 
-  const getTagList = async () => {
-    getTags().then(async function (tags: string[]) {
-      tagList = tags.map((x) => ({ name: x, value: x }));
+  const getTag = async () => {
+    getLatestTag().then(async function (t: string) {
+      tag = t;
     });
   };
 
@@ -63,41 +66,35 @@
         case 0xa7f5cd7e:
           ver = "us";
           romHashMessage = "Valid US ROM";
-          requiredPlatform = "n64";
-          selectedPlatform = "n64";
+          platform = "n64";
           break;
         case 0xbd60ca66:
           ver = "jp";
           romHashMessage = "Valid JP ROM";
-          requiredPlatform = "n64";
-          selectedPlatform = "n64";
+          platform = "n64";
           break;
         case 0xd469a9e1:
           ver = "us";
           romHashMessage = "Valid US WAD";
-          requiredPlatform = "wii";
-          selectedPlatform = "wii";
+          platform = "wii";
           channelId = "FPUS";
           title = "fp-US";
           break;
         case 0x6566e39a:
           ver = "jp";
           romHashMessage = "Valid JP WAD";
-          requiredPlatform = "wii";
-          selectedPlatform = "wii";
+          platform = "wii";
           channelId = "FPJP";
           title = "fp-JP";
           break;
         default:
           if (file.name.split(".").pop() === "zip") {
             romHashMessage = "Wii U Archive";
-            requiredPlatform = "wiiu";
-            selectedPlatform = "wiiu";
+            platform = "wiiu";
             returnZip = true;
           } else if (file.name.split(".").pop() === "tar") {
             romHashMessage = "Wii U Archive";
-            requiredPlatform = "wiiu";
-            selectedPlatform = "wiiu";
+            platform = "wiiu";
             returnZip = false;
           } else {
             ver = "unk";
@@ -115,7 +112,7 @@
     if (tag === "" || ver === "" || outFileName === "") {
       return;
     }
-    switch (selectedPlatform) {
+    switch (platform) {
       case "n64":
         outFileName = `${tag}-${ver}.z64`;
         break;
@@ -132,8 +129,8 @@
   }
 
   onMount(() => {
-    selectedPlatform = "n64";
-    getTagList();
+    platform = "n64";
+    getTag();
   });
 
   // https://stackoverflow.com/a/62176999
@@ -160,7 +157,7 @@
     } else if (outFileName === null || outFileName === "") {
       disableButton = true;
     } else if (
-      selectedPlatform === "wii" &&
+      platform === "wii" &&
       (title === null || title === "" || channelId === null || channelId === "")
     ) {
       disableButton = true;
@@ -185,7 +182,7 @@
       patchFile: Uint8Array
     ) {
       const input = await readFileAsUint8Array(inputFile);
-      if (selectedPlatform === "n64") {
+      if (platform === "n64") {
         const worker = new Worker(
           new URL("./lib/worker_n64", import.meta.url),
           { type: "module" }
@@ -200,7 +197,7 @@
           input: input,
           patch: patchFile,
         });
-      } else if (selectedPlatform === "wii") {
+      } else if (platform === "wii") {
         const memPatch = await getS3File("gzi/mem_patch.gzi");
         const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
         const hbBin = await getS3File(`hb/${ver}.bin`);
@@ -234,7 +231,7 @@
         };
 
         worker.postMessage(settings);
-      } else if (selectedPlatform === "wiiu") {
+      } else if (platform === "wiiu") {
         const config = await getS3File(`wiiu/${ver}.ini`);
         let frameLayout: Uint8Array;
         if (enableWidescreen && enableDarkFilter) {
@@ -277,8 +274,9 @@
   <div
     class="container flex flex-col items-center justify-center border border-sky-500 rounded max-w-md p-8 dark:text-white"
   >
-    <h1 class="text-4xl pb-8 font-bold">fp web patcher</h1>
-    <div style="flex items-center">
+    <h1 class="text-4xl font-bold">fp web patcher</h1>
+    <Label class="pb-8 {tag != null ? '' : 'invisible'}">current fp version: {tag}</Label>
+    <div class="w-5/6">
       <Label for="fileInput" class="pb-2"
         >{romHashMessage}
         <button id="b3" on:click={() => (clickOutsideModal = true)}>
@@ -300,7 +298,6 @@
         id="fileInput"
         class="mb-2"
         on:change={handleFileSelect}
-        on:change={blockBuild}
       />
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
@@ -332,114 +329,61 @@
       but they must all be in the same folder
     </Modal>
 
-    <div class="flex items-center pb-5">
-      <p class="text-left mr-3">Version:</p>
-      <Select
-        class="mt-2"
-        items={tagList !== null ? tagList : []}
-        bind:value={tag}
-        on:change={handleVersionChange}
-        on:change={blockBuild}
-      />
-    </div>
-    <div class="platform-settings grid gap-1 mb-6 md:grid-cols-[100px_auto]">
-      <ul
-        class="flex flex-col justify-center gap-4"
-        on:change={handleVersionChange}
-        on:change={blockBuild}
-      >
-        <li>
-          <Radio
-            name="platform"
-            value="n64"
-            disabled={requiredPlatform !== "n64"}
-            bind:group={selectedPlatform}>N64</Radio
-          >
-        </li>
-        <li>
-          <Radio
-            name="platform"
-            value="wii"
-            disabled={requiredPlatform !== "wii"}
-            bind:group={selectedPlatform}>Wii</Radio
-          >
-        </li>
-        <li>
-          <Radio
-            name="platform"
-            value="wiiu"
-            disabled={requiredPlatform !== "wiiu"}
-            bind:group={selectedPlatform}>Wii U</Radio
-          >
-        </li>
-        <!--
-        <li>
-          <Radio
-            name="platform"
-            value="switch"
-            disabled={requiredPlatform !== null &&
-              requiredPlatform !== "switch"}
-            bind:group={selectedPlatform}>Switch</Radio
-          >
-        </li>
-      -->
-      </ul>
-      <div>
-        <div class="flex items-center pb-5 whitespace-nowrap">
-          <p class="text-left mr-3">Output file:</p>
-          <Input
-            type="text"
-            id="outfile"
-            bind:value={outFileName}
-            on:change={blockBuild}
-            required
-          />
-        </div>
-        {#if selectedPlatform === "wii"}
-          <div transition:slide>
-            <div class="flex items-center pb-5 whitespace-nowrap">
-              <p class="text-left mr-3">Channel title:</p>
-              <Input
-                type="text"
-                id="channel-title"
-                bind:value={title}
-                on:change={blockBuild}
-                required
-              />
-            </div>
-            <div class="flex items-center pb-5 whitespace-nowrap">
-              <p class="text-left mr-3">Channel id:</p>
-              <Input
-                type="text"
-                id="channel-id"
-                bind:value={channelId}
-                on:change={blockBuild}
-                required
-              />
-            </div>
-          </div>
-        {/if}
-        {#if selectedPlatform === "wiiu"}
-          <div transition:slide class="space-y-4">
-            <div class="flex gap-5">
-              <Radio
-                name="version"
-                value="us"
-                bind:group={ver}
-                on:change={handleVersionChange}>US</Radio
-              >
-              <Radio
-                name="version"
-                value="jp"
-                bind:group={ver}
-                on:change={handleVersionChange}>JP</Radio
-              >
-            </div>
-            <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
-            <Checkbox bind:checked={enableWidescreen}>Widescreen</Checkbox>
-          </div>
-        {/if}
+    <div class="platform-settings grid gap-1 mb-6">
+      <div class="flex items-center py-5 whitespace-nowrap">
+        <p class="text-left mr-3">Output file:</p>
+        <Input
+          type="text"
+          id="outfile"
+          bind:value={outFileName}
+          on:change={blockBuild}
+          required
+        />
       </div>
+      {#if platform === "wii"}
+        <div transition:slide>
+          <div class="flex items-center pb-5 whitespace-nowrap">
+            <p class="text-left mr-3">Channel title:</p>
+            <Input
+              type="text"
+              id="channel-title"
+              bind:value={title}
+              on:change={blockBuild}
+              required
+            />
+          </div>
+          <div class="flex items-center pb-5 whitespace-nowrap">
+            <p class="text-left mr-3">Channel id:</p>
+            <Input
+              type="text"
+              id="channel-id"
+              bind:value={channelId}
+              on:change={blockBuild}
+              required
+            />
+          </div>
+        </div>
+      {/if}
+      {#if platform === "wiiu"}
+        <div transition:slide class="space-y-4">
+          <div class="flex gap-5">
+            <Radio
+              name="version"
+              value="us"
+              bind:group={ver}
+              on:change={handleVersionChange}>US</Radio
+            >
+            <Radio
+              name="version"
+              value="jp"
+              bind:group={ver}
+              on:change={handleVersionChange}>JP</Radio
+            >
+          </div>
+          <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
+          <Checkbox bind:checked={enableWidescreen}>Widescreen</Checkbox>
+        </div>
+      {/if}
     </div>
     <div class="grid grid-cols-5 gap-4 items-center auto-cols-max">
       <div />
