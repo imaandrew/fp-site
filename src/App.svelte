@@ -99,7 +99,6 @@
           } else {
             ver = "unk";
             romHashMessage = "Unknown base file";
-            console.log(+crc.toString(16));
           }
           break;
       }
@@ -109,7 +108,7 @@
   };
 
   function handleVersionChange() {
-    if (tag === "" || ver === "" || outFileName === "") {
+    if (tag === "" || ver === "" || outFileName === "" || tag === null || ver === "unk") {
       return;
     }
     switch (platform) {
