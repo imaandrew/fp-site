@@ -3344,8 +3344,8 @@ __metadata:
   linkType: hard
 
 "flowbite-svelte@npm:^0.44.0":
-  version: 0.44.20
-  resolution: "flowbite-svelte@npm:0.44.20"
+  version: 0.44.21
+  resolution: "flowbite-svelte@npm:0.44.21"
   dependencies:
     "@floating-ui/dom": ^1.5.3
     apexcharts: ^3.44.0
@@ -3353,7 +3353,7 @@ __metadata:
     tailwind-merge: ^2.0.0
   peerDependencies:
     svelte: ^4.0.0
-  checksum: 0563d5d495f29b3ceff48aa45cbd6d70c3da90e47294b368772cef45308ce19206581a4195b1fe478632727b69502272c647374c6f9e231b430b0a25fc045563
+  checksum: 2c620857545528a3de072f2a03a62ccd0a93f2aa12a00888de2e998cd1070a2b1be013e068224aed20678df8e05602232d4f1a14dc375eb11c499db801cc43ed
   languageName: node
   linkType: hard
 
