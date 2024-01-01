@@ -3423,7 +3423,7 @@ __metadata:
     svelte-add: ^2023.6.28-0.0
     svelte-check: ^3.3.1
     svelte-preprocess: ^5.0.4
-    tailwind-merge: ^1.13.2
+    tailwind-merge: ^2.0.0
     tailwindcss: ^3.3.2
     tslib: ^2.5.0
     typescript: ^5.0.2
@@ -5868,13 +5868,6 @@ __metadata:
   bin:
     svgo: ./bin/svgo
   checksum: c07d49757264d9122090e8b6c674c25d25608feec7eb5df5276f8c8e3ec113e9b515ffc3cb5b57a4c24942980b15b5078321105a15f379650271dc1f25b05eb6
-  languageName: node
-  linkType: hard
-
-"tailwind-merge@npm:^1.13.2":
-  version: 1.14.0
-  resolution: "tailwind-merge@npm:1.14.0"
-  checksum: 8cf5d37f51b3b32e4bdd5544feaed34357bfba2f64f14834cc4a21ac29b0ae22d7255386467a0f1dadb3e38499389efbbabeddcd0b16571af5a0d346a4921877
   languageName: node
   linkType: hard
 
