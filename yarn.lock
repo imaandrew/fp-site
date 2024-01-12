@@ -3464,7 +3464,7 @@ __metadata:
     fp-web-patcher: "npm:^0.4.0"
     postcss: "npm:^8.4.26"
     postcss-load-config: "npm:^5.0.0"
-    prettier: "npm:3.2.0"
+    prettier: "npm:3.2.1"
     prettier-plugin-svelte: "npm:^3.0.0"
     svelte: "npm:^4.0.5"
     svelte-add: "npm:^2023.6.28-0.0"
@@ -5148,12 +5148,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.2.0":
-  version: 3.2.0
-  resolution: "prettier@npm:3.2.0"
+"prettier@npm:3.2.1":
+  version: 3.2.1
+  resolution: "prettier@npm:3.2.1"
   bin:
     prettier: bin/prettier.cjs
-  checksum: eb2eb63038ca9aaf86bda7dc49b879a278bc8344d28236fef08a8f185e8ce721a40155acc4a494e8f91ecbcdd9a132fd326516f791c61cbfa9037c1f74d6d029
+  checksum: a26d26a74ba5cbf23a9741074ceef4f53a08ced03c42449dc9615ecd08ada9d19d5247ad2b0dfb15b2c8e57ec9f516074627b85b9f03270b08c184c64e7d8f64
   languageName: node
   linkType: hard
 
