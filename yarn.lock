@@ -3374,12 +3374,12 @@ __metadata:
   linkType: hard
 
 "flowbite@npm:^2.0.0, flowbite@npm:^2.2.0":
-  version: 2.2.1
-  resolution: "flowbite@npm:2.2.1"
+  version: 2.3.0
+  resolution: "flowbite@npm:2.3.0"
   dependencies:
     "@popperjs/core": "npm:^2.9.3"
     mini-svg-data-uri: "npm:^1.4.3"
-  checksum: 10/299964a50688ca2939b044e6c30340d07b582cfb4a025e743eb41381fccb12118ffe81d069e8a4a94a25388da694e90ece003d60949b121e5fbc790be4fadd30
+  checksum: 10/a72bc4c68fd6cc832e2df2fbf329eca5d96d8297da6f0578addca68fccc8e33fcc12c00403b2b8cf550a345e46831d86a35e69b2fd4e79b7087f01b7712310a3
   languageName: node
   linkType: hard
 
