@@ -3469,9 +3469,9 @@ __metadata:
   linkType: soft
 
 "fp-web-patcher@npm:^0.4.0":
-  version: 0.4.1
-  resolution: "fp-web-patcher@npm:0.4.1"
-  checksum: 10/fd4f099fac323f386a7591d9603ae9ef4d58313d3e767eb7e62e9e7c52d2866129fe563b8917b24d710f8719a23dc04aeb2ca3da6cf462f8e44a51fb8c033cf2
+  version: 0.4.2
+  resolution: "fp-web-patcher@npm:0.4.2"
+  checksum: 10/fb3562b936395f0de998c702315ac3bf8ee6b43f55ad115b7a1cd469771cfab68795830a555fb1166073eb3fafdcc0cd6c46e2f658bac55ba0a0a8e3e296b22d
   languageName: node
   linkType: hard
 
