@@ -1957,9 +1957,9 @@ __metadata:
   linkType: hard
 
 "@tsconfig/svelte@npm:^5.0.0":
-  version: 5.0.2
-  resolution: "@tsconfig/svelte@npm:5.0.2"
-  checksum: 10/c16608913db89c8bfc2df805224f12403dd9d2f6f9480cc293e3aae8d1897f3a2de44db14d7c039f0325358e139fb071ec843ee46445a7e10d5265fe48f6ae80
+  version: 5.0.3
+  resolution: "@tsconfig/svelte@npm:5.0.3"
+  checksum: 10/5102ab8f7ca2677138d2db83d33bd28f8f9bd2b5bad25291c55859657866d2a38d56e98e5ccadf8b9548805e481a1571bfc2e09bf0c5ee2a8f113b8b4a4f4062
   languageName: node
   linkType: hard
 
