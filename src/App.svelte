@@ -108,7 +108,13 @@
   };
 
   function handleVersionChange() {
-    if (tag === "" || ver === "" || outFileName === "" || tag === null || ver === "unk") {
+    if (
+      tag === "" ||
+      ver === "" ||
+      outFileName === "" ||
+      tag === null ||
+      ver === "unk"
+    ) {
       return;
     }
     switch (platform) {
@@ -178,13 +184,13 @@
     showLoading = true;
     disableButton = true;
     getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
-      patchFile: Uint8Array
+      patchFile: Uint8Array,
     ) {
       const input = await readFileAsUint8Array(inputFile);
       if (platform === "n64") {
         const worker = new Worker(
           new URL("./lib/worker_n64", import.meta.url),
-          { type: "module" }
+          { type: "module" },
         );
 
         worker.onmessage = function (event) {
@@ -221,7 +227,7 @@
 
         const worker = new Worker(
           new URL("./lib/worker_wii", import.meta.url),
-          { type: "module" }
+          { type: "module" },
         );
 
         worker.onmessage = function (event) {
@@ -255,7 +261,7 @@
 
         const worker = new Worker(
           new URL("./lib/worker_wiiu", import.meta.url),
-          { type: "module" }
+          { type: "module" },
         );
 
         worker.onmessage = function (event) {
@@ -269,12 +275,14 @@
   };
 </script>
 
-<main class="min-h-screen overflow-hidden flex items-center justify-center">
+<main class="flex min-h-screen items-center justify-center overflow-hidden">
   <div
-    class="container flex flex-col items-center justify-center border border-sky-500 rounded max-w-md p-8 dark:text-white"
+    class="container flex max-w-md flex-col items-center justify-center rounded border border-sky-500 p-8 dark:text-white"
   >
     <h1 class="text-4xl font-bold">fp web patcher</h1>
-    <Label class="pb-8 {tag != null ? '' : 'invisible'}">current fp version: {tag}</Label>
+    <Label class="pb-8 {tag != null ? '' : 'invisible'}"
+      >current fp version: {tag}</Label
+    >
     <div class="w-5/6">
       <Label for="fileInput" class="pb-2"
         >{romHashMessage}
@@ -283,7 +291,7 @@
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            class="w-4 h-4 ml-1"
+            class="ml-1 h-4 w-4"
             ><path
               fill-rule="evenodd"
               d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z"
@@ -293,11 +301,7 @@
           <span class="sr-only">Show file format information</span></button
         ></Label
       >
-      <Fileupload
-        id="fileInput"
-        class="mb-2"
-        on:change={handleFileSelect}
-      />
+      <Fileupload id="fileInput" class="mb-2" on:change={handleFileSelect} />
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
 
@@ -328,9 +332,9 @@
       but they must all be in the same folder
     </Modal>
 
-    <div class="platform-settings grid gap-1 mb-6">
-      <div class="flex items-center py-5 whitespace-nowrap">
-        <p class="text-left mr-3">Output file:</p>
+    <div class="platform-settings mb-6 grid gap-1">
+      <div class="flex items-center whitespace-nowrap py-5">
+        <p class="mr-3 text-left">Output file:</p>
         <Input
           type="text"
           id="outfile"
@@ -341,8 +345,8 @@
       </div>
       {#if platform === "wii"}
         <div transition:slide>
-          <div class="flex items-center pb-5 whitespace-nowrap">
-            <p class="text-left mr-3">Channel title:</p>
+          <div class="flex items-center whitespace-nowrap pb-5">
+            <p class="mr-3 text-left">Channel title:</p>
             <Input
               type="text"
               id="channel-title"
@@ -351,8 +355,8 @@
               required
             />
           </div>
-          <div class="flex items-center pb-5 whitespace-nowrap">
-            <p class="text-left mr-3">Channel id:</p>
+          <div class="flex items-center whitespace-nowrap pb-5">
+            <p class="mr-3 text-left">Channel id:</p>
             <Input
               type="text"
               id="channel-id"
@@ -384,7 +388,7 @@
         </div>
       {/if}
     </div>
-    <div class="grid grid-cols-5 gap-4 items-center auto-cols-max">
+    <div class="grid auto-cols-max grid-cols-5 items-center gap-4">
       <div />
       <GradientButton
         type="submit"
