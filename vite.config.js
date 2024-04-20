@@ -8,6 +8,6 @@ export default defineConfig({
   worker: {
     plugins: () => {
       return [wasm(), topLevelAwait()];
-    }
-  }
+    },
+  },
 });

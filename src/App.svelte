@@ -180,10 +180,13 @@
       .then(async (patchFile: Uint8Array) => {
         const input = await readFileAsUint8Array(inputFile);
         if (platform === "n64") {
-          const worker = new Worker(
-          new URL("./lib/worker_n64", import.meta.url),
-          { type: "module" },
-        );
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
+                type: "classic",
+              });
 
           worker.onmessage = (event: MessageEvent<Uint8Array>) => {
             savePatchedFile(event);
