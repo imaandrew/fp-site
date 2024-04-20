@@ -35,7 +35,7 @@
   let showLoading = false;
   let buttonText = writable("Build");
 
-  const handleFileSelect = async (event: Event) => {
+  async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
     if (!target.files) {
       return;
@@ -51,15 +51,9 @@
           break;
       }
     }
-  };
+  }
 
-  const getTag = async () => {
-    getLatestTag().then(async function (t: string) {
-      tag = t;
-    });
-  };
-
-  const assignFileHash = async (file: File) => {
+  async function assignFileHash(file: File) {
     try {
       const crc = await getCrc(file);
       switch (crc) {
@@ -105,14 +99,14 @@
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
   function handleVersionChange() {
     if (
       tag === "" ||
       ver === "" ||
       outFileName === "" ||
-      tag === null ||
+      tag == null ||
       ver === "unk"
     ) {
       return;
@@ -133,9 +127,9 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     platform = "n64";
-    getTag();
+    tag = await getLatestTag();
   });
 
   // https://stackoverflow.com/a/62176999
@@ -155,15 +149,15 @@
   }
 
   function blockBuild() {
-    if (ver === "unk" || ver == null || inputFile === null) {
+    if (ver === "unk" || ver == null || inputFile == null) {
       disableButton = true;
-    } else if (tag === null || tag === "") {
+    } else if (tag == null || tag === "") {
       disableButton = true;
-    } else if (outFileName === null || outFileName === "") {
+    } else if (outFileName == null || outFileName === "") {
       disableButton = true;
     } else if (
       platform === "wii" &&
-      (title === null || title === "" || channelId === null || channelId === "")
+      (title == null || title === "" || channelId == null || channelId === "")
     ) {
       disableButton = true;
     } else {
@@ -172,107 +166,114 @@
   }
 
   function savePatchedFile(event: MessageEvent<Uint8Array>) {
-    const { data } = event;
-    saveUint8ArrayToFile(data, outFileName);
+    saveUint8ArrayToFile(event.data, outFileName);
     buttonText.set("Build");
     showLoading = false;
     disableButton = false;
   }
 
-  const buildFp = () => {
+  function buildFp() {
     buttonText.set("Building...");
     showLoading = true;
     disableButton = true;
-    getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
-      patchFile: Uint8Array,
-    ) {
-      const input = await readFileAsUint8Array(inputFile);
-      if (platform === "n64") {
-        const worker = new Worker(
+    getS3File(`fp/${tag}/${ver}.xdelta`)
+      .then(async (patchFile: Uint8Array) => {
+        const input = await readFileAsUint8Array(inputFile);
+        if (platform === "n64") {
+          const worker = new Worker(
           new URL("./lib/worker_n64", import.meta.url),
           { type: "module" },
         );
 
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
 
-        worker.postMessage({
-          input: input,
-          patch: patchFile,
-        });
-      } else if (platform === "wii") {
-        const memPatch = await getS3File("gzi/mem_patch.gzi");
-        const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
-        const hbBin = await getS3File(`hb/${ver}.bin`);
-        const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
-        concatPatch.set(memPatch, 0);
-        concatPatch[memPatch.length - 1] = 10;
-        concatPatch.set(hbPatch, memPatch.length);
-        const dolPatch = {
-          dol_num: 1,
-          load_addr: 0x90000800,
-          data: hbBin,
-        };
+          worker.postMessage({
+            input: input,
+            patch: patchFile,
+          });
+        } else if (platform === "wii") {
+          const memPatch = await getS3File("gzi/mem_patch.gzi");
+          const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
+          const hbBin = await getS3File(`hb/${ver}.bin`);
+          const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
+          concatPatch.set(memPatch, 0);
+          concatPatch[memPatch.length - 1] = 10;
+          concatPatch.set(hbPatch, memPatch.length);
+          const dolPatch = {
+            dol_num: 1,
+            load_addr: 0x90000800,
+            data: hbBin,
+          };
 
-        const settings = {
-          wad: input,
-          xdelta_patch: patchFile,
-          gzi_patch: concatPatch,
-          channel_id: channelId,
-          title: title,
-          dol_patch: dolPatch,
-        };
+          const settings = {
+            wad: input,
+            xdelta_patch: patchFile,
+            gzi_patch: concatPatch,
+            channel_id: channelId,
+            title: title,
+            dol_patch: dolPatch,
+          };
 
-        const worker = new Worker(
-          new URL("./lib/worker_wii", import.meta.url),
-          { type: "module" },
-        );
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_wii.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_wii.ts", import.meta.url), {
+                type: "classic",
+              });
 
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
 
-        worker.postMessage(settings);
-      } else if (platform === "wiiu") {
-        const config = await getS3File(`wiiu/${ver}.ini`);
-        let frameLayout: Uint8Array;
-        if (enableWidescreen && enableDarkFilter) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
-        } else if (enableDarkFilter) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
-        } else if (enableWidescreen) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
-        } else {
-          frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
+          worker.postMessage(settings);
+        } else if (platform === "wiiu") {
+          const config = await getS3File(`wiiu/${ver}.ini`);
+          let frameLayout: Uint8Array;
+          if (enableWidescreen && enableDarkFilter) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
+          } else if (enableDarkFilter) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
+          } else if (enableWidescreen) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
+          } else {
+            frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
+          }
+          const settings = {
+            input_archive: input,
+            xdelta_patch: patchFile,
+            enable_dark_filter: enableDarkFilter,
+            enable_widescreen: enableWidescreen,
+            name: `fp-${tag}-${ver}`,
+            config: config,
+            return_zip: returnZip,
+            frame_layout: frameLayout,
+          };
+
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_wiiu.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_wiiu.ts", import.meta.url), {
+                type: "classic",
+              });
+
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
+
+          worker.postMessage(settings);
         }
-        const settings = {
-          input_archive: input,
-          xdelta_patch: patchFile,
-          enable_dark_filter: enableDarkFilter,
-          enable_widescreen: enableWidescreen,
-          name: `fp-${tag}-${ver}`,
-          config: config,
-          return_zip: returnZip,
-          frame_layout: frameLayout,
-        };
-
-        const worker = new Worker(
-          new URL("./lib/worker_wiiu", import.meta.url),
-          { type: "module" },
-        );
-
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
-
-        worker.postMessage(settings);
-      }
-    });
-  };
+      })
+      .catch((error: Error) => {
+        console.error(error.message);
+      });
+  }
 </script>
 
 <main class="flex min-h-screen items-center justify-center overflow-hidden">

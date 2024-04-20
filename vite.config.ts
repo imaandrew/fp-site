@@ -5,4 +5,9 @@ import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
   plugins: [svelte(), wasm(), topLevelAwait()],
+  worker: {
+    plugins: () => {
+      return [wasm(), topLevelAwait()];
+    }
+  }
 });
