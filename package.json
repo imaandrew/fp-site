@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && pnpm build:wasm",
+    "build": "pnpm build:wasm && vite build",
     "build:wasm": "wasm-pack build ./wasm --target web --release",
     "watch": "cd wasm && cargo watch -i .gitignore -i \"pkg/*\" -i \"target/*\" -s \"wasm-pack build --target web --dev\"",
     "preview": "vite preview",
