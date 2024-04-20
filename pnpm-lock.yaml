@@ -2666,10 +2666,6 @@ packages:
       signal-exit: 4.1.0
     dev: true
 
-  /fp-web-patcher@0.4.4:
-    resolution: {integrity: sha512-q9jegs973H/cI0U3dvwUzKLsTtv6FZuIQyhV+1IbaKEV0VVWCkImpSPYlM1v4sT3Lfx0NejG9NfoV+fMu1rBWw==}
-    dev: true
-
   /fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
     dev: true

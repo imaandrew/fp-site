@@ -1,4 +1,4 @@
-import __wbg_init, { wiiu_inject } from "fp-web-patcher";
+import __wbg_init, { wiiu_inject } from "../../wasm/pkg";
 
 export type WiiUSettings = {
   input_archive: Uint8Array;

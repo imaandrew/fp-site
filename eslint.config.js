@@ -41,7 +41,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["fp-web-patcher/", "pkg/"],
+    ignores: ["wasm/", "pkg/", "dist/"],
   },
   {
     files: ["**/*.js"],
