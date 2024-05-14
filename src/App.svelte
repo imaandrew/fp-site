@@ -35,7 +35,7 @@
   let showLoading = false;
   let buttonText = writable("Build");
 
-  const handleFileSelect = async (event: Event) => {
+  async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
     if (!target.files) {
       return;
@@ -51,15 +51,9 @@
           break;
       }
     }
-  };
+  }
 
-  const getTag = async () => {
-    getLatestTag().then(async function (t: string) {
-      tag = t;
-    });
-  };
-
-  const assignFileHash = async (file: File) => {
+  async function assignFileHash(file: File) {
     try {
       const crc = await getCrc(file);
       switch (crc) {
@@ -105,10 +99,16 @@
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
   function handleVersionChange() {
-    if (tag === "" || ver === "" || outFileName === "" || tag === null || ver === "unk") {
+    if (
+      tag === "" ||
+      ver === "" ||
+      outFileName === "" ||
+      tag == null ||
+      ver === "unk"
+    ) {
       return;
     }
     switch (platform) {
@@ -127,9 +127,9 @@
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     platform = "n64";
-    getTag();
+    tag = await getLatestTag();
   });
 
   // https://stackoverflow.com/a/62176999
@@ -149,15 +149,15 @@
   }
 
   function blockBuild() {
-    if (ver === "unk" || ver == null || inputFile === null) {
+    if (ver === "unk" || ver == null || inputFile == null) {
       disableButton = true;
-    } else if (tag === null || tag === "") {
+    } else if (tag == null || tag === "") {
       disableButton = true;
-    } else if (outFileName === null || outFileName === "") {
+    } else if (outFileName == null || outFileName === "") {
       disableButton = true;
     } else if (
       platform === "wii" &&
-      (title === null || title === "" || channelId === null || channelId === "")
+      (title == null || title === "" || channelId == null || channelId === "")
     ) {
       disableButton = true;
     } else {
@@ -166,115 +166,127 @@
   }
 
   function savePatchedFile(event: MessageEvent<Uint8Array>) {
-    const { data } = event;
-    saveUint8ArrayToFile(data, outFileName);
+    saveUint8ArrayToFile(event.data, outFileName);
     buttonText.set("Build");
     showLoading = false;
     disableButton = false;
   }
 
-  const buildFp = () => {
+  function buildFp() {
     buttonText.set("Building...");
     showLoading = true;
     disableButton = true;
-    getS3File(`fp/${tag}/${ver}.xdelta`).then(async function (
-      patchFile: Uint8Array
-    ) {
-      const input = await readFileAsUint8Array(inputFile);
-      if (platform === "n64") {
-        const worker = new Worker(
-          new URL("./lib/worker_n64", import.meta.url),
-          { type: "module" }
-        );
+    getS3File(`fp/${tag}/${ver}.xdelta`)
+      .then(async (patchFile: Uint8Array) => {
+        const input = await readFileAsUint8Array(inputFile);
+        if (platform === "n64") {
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
+                type: "classic",
+              });
 
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
 
-        worker.postMessage({
-          input: input,
-          patch: patchFile,
-        });
-      } else if (platform === "wii") {
-        const memPatch = await getS3File("gzi/mem_patch.gzi");
-        const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
-        const hbBin = await getS3File(`hb/${ver}.bin`);
-        const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
-        concatPatch.set(memPatch, 0);
-        concatPatch[memPatch.length - 1] = 10;
-        concatPatch.set(hbPatch, memPatch.length);
-        const dolPatch = {
-          dol_num: 1,
-          load_addr: 0x90000800,
-          data: hbBin,
-        };
+          worker.postMessage({
+            input: input,
+            patch: patchFile,
+          });
+        } else if (platform === "wii") {
+          const memPatch = await getS3File("gzi/mem_patch.gzi");
+          const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
+          const hbBin = await getS3File(`hb/${ver}.bin`);
+          const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
+          concatPatch.set(memPatch, 0);
+          concatPatch[memPatch.length - 1] = 10;
+          concatPatch.set(hbPatch, memPatch.length);
+          const dolPatch = {
+            dol_num: 1,
+            load_addr: 0x90000800,
+            data: hbBin,
+          };
 
-        const settings = {
-          wad: input,
-          xdelta_patch: patchFile,
-          gzi_patch: concatPatch,
-          channel_id: channelId,
-          title: title,
-          dol_patch: dolPatch,
-        };
+          const settings = {
+            wad: input,
+            xdelta_patch: patchFile,
+            gzi_patch: concatPatch,
+            channel_id: channelId,
+            title: title,
+            dol_patch: dolPatch,
+          };
 
-        const worker = new Worker(
-          new URL("./lib/worker_wii", import.meta.url),
-          { type: "module" }
-        );
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_wii.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_wii.ts", import.meta.url), {
+                type: "classic",
+              });
 
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
 
-        worker.postMessage(settings);
-      } else if (platform === "wiiu") {
-        const config = await getS3File(`wiiu/${ver}.ini`);
-        let frameLayout: Uint8Array;
-        if (enableWidescreen && enableDarkFilter) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
-        } else if (enableDarkFilter) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
-        } else if (enableWidescreen) {
-          frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
-        } else {
-          frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
+          worker.postMessage(settings);
+        } else if (platform === "wiiu") {
+          const config = await getS3File(`wiiu/${ver}.ini`);
+          let frameLayout: Uint8Array;
+          if (enableWidescreen && enableDarkFilter) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
+          } else if (enableDarkFilter) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
+          } else if (enableWidescreen) {
+            frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
+          } else {
+            frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
+          }
+          const settings = {
+            input_archive: input,
+            xdelta_patch: patchFile,
+            enable_dark_filter: enableDarkFilter,
+            enable_widescreen: enableWidescreen,
+            name: `fp-${tag}-${ver}`,
+            config: config,
+            return_zip: returnZip,
+            frame_layout: frameLayout,
+          };
+
+          const worker = import.meta.env.DEV
+            ? new Worker(new URL("./lib/worker_wiiu.ts", import.meta.url), {
+                type: "module",
+              })
+            : new Worker(new URL("./lib/worker_wiiu.ts", import.meta.url), {
+                type: "classic",
+              });
+
+          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
+            savePatchedFile(event);
+            worker.terminate();
+          };
+
+          worker.postMessage(settings);
         }
-        const settings = {
-          input_archive: input,
-          xdelta_patch: patchFile,
-          enable_dark_filter: enableDarkFilter,
-          enable_widescreen: enableWidescreen,
-          name: `fp-${tag}-${ver}`,
-          config: config,
-          return_zip: returnZip,
-          frame_layout: frameLayout,
-        };
-
-        const worker = new Worker(
-          new URL("./lib/worker_wiiu", import.meta.url),
-          { type: "module" }
-        );
-
-        worker.onmessage = function (event) {
-          savePatchedFile(event);
-          worker.terminate();
-        };
-
-        worker.postMessage(settings);
-      }
-    });
-  };
+      })
+      .catch((error: Error) => {
+        console.error(error.message);
+      });
+  }
 </script>
 
-<main class="min-h-screen overflow-hidden flex items-center justify-center">
+<main class="flex min-h-screen items-center justify-center overflow-hidden">
   <div
-    class="container flex flex-col items-center justify-center border border-sky-500 rounded max-w-md p-8 dark:text-white"
+    class="container flex max-w-md flex-col items-center justify-center rounded border border-sky-500 p-8 dark:text-white"
   >
     <h1 class="text-4xl font-bold">fp web patcher</h1>
-    <Label class="pb-8 {tag != null ? '' : 'invisible'}">current fp version: {tag}</Label>
+    <Label class="pb-8 {tag != null ? '' : 'invisible'}"
+      >current fp version: {tag}</Label
+    >
     <div class="w-5/6">
       <Label for="fileInput" class="pb-2"
         >{romHashMessage}
@@ -283,7 +295,7 @@
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            class="w-4 h-4 ml-1"
+            class="ml-1 h-4 w-4"
             ><path
               fill-rule="evenodd"
               d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z"
@@ -293,11 +305,7 @@
           <span class="sr-only">Show file format information</span></button
         ></Label
       >
-      <Fileupload
-        id="fileInput"
-        class="mb-2"
-        on:change={handleFileSelect}
-      />
+      <Fileupload id="fileInput" class="mb-2" on:change={handleFileSelect} />
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
 
@@ -328,9 +336,9 @@
       but they must all be in the same folder
     </Modal>
 
-    <div class="platform-settings grid gap-1 mb-6">
-      <div class="flex items-center py-5 whitespace-nowrap">
-        <p class="text-left mr-3">Output file:</p>
+    <div class="platform-settings mb-6 grid gap-1">
+      <div class="flex items-center whitespace-nowrap py-5">
+        <p class="mr-3 text-left">Output file:</p>
         <Input
           type="text"
           id="outfile"
@@ -341,8 +349,8 @@
       </div>
       {#if platform === "wii"}
         <div transition:slide>
-          <div class="flex items-center pb-5 whitespace-nowrap">
-            <p class="text-left mr-3">Channel title:</p>
+          <div class="flex items-center whitespace-nowrap pb-5">
+            <p class="mr-3 text-left">Channel title:</p>
             <Input
               type="text"
               id="channel-title"
@@ -351,8 +359,8 @@
               required
             />
           </div>
-          <div class="flex items-center pb-5 whitespace-nowrap">
-            <p class="text-left mr-3">Channel id:</p>
+          <div class="flex items-center whitespace-nowrap pb-5">
+            <p class="mr-3 text-left">Channel id:</p>
             <Input
               type="text"
               id="channel-id"
@@ -384,7 +392,7 @@
         </div>
       {/if}
     </div>
-    <div class="grid grid-cols-5 gap-4 items-center auto-cols-max">
+    <div class="grid auto-cols-max grid-cols-5 items-center gap-4">
       <div />
       <GradientButton
         type="submit"

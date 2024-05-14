@@ -14,18 +14,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
       - name: Setup Node.js
         uses: actions/setup-node@v4
-
+        with:
+          cache: "pnpm"
       - name: Install Dependencies
-        run: yarn install --immutable
-
-      - name: Lint ESLint
-        run: yarn lint:eslint
-
-      - name: Lint Prettier
-        run: yarn lint:prettier
-
-      - name: Lint Svelte
-        run: yarn lint:svelte
+        run: pnpm i
+      - name: Lint
+        run: pnpm lint
