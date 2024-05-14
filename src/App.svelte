@@ -61,11 +61,15 @@
       const crc = await getCrc(file);
       switch (crc) {
         case 0xa7f5cd7e:
+        case 0xd56d1c89:
+        case 0xa4c948bf:
           ver = "us";
           romHashMessage = "Valid US ROM";
           platform = "n64";
           break;
         case 0xbd60ca66:
+        case 0x1fb7e59a:
+        case 0xca72bffc:
           ver = "jp";
           romHashMessage = "Valid JP ROM";
           platform = "n64";
@@ -182,6 +186,17 @@
     getS3File(`fp/${tag}/${ver}.xdelta`)
       .then(async (patchFile: Uint8Array) => {
         const input = await readFileAsUint8Array(inputFile);
+        const dataView = new DataView(input.buffer);
+        const head = dataView.getUint32(0);
+        if (head == 0x37804012) {
+          for (let i = 0; i < dataView.byteLength; i += 2) {
+            dataView.setUint16(i, dataView.getUint16(i), true);
+          }
+        } else if (head == 0x40123780) {
+          for (let i = 0; i < dataView.byteLength; i += 4) {
+            dataView.setUint32(i, dataView.getUint32(i), true);
+          }
+        }
         if (platform === "n64") {
           const worker = import.meta.env.DEV
             ? new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
@@ -321,17 +336,7 @@
       outsideclose
     >
       <h3 class="font-semibold text-gray-900 dark:text-white">N64</h3>
-      ROM must be in the Z64 format (big endian). If the file ends in .z64 but the
-      patcher doesn't recognize it, it might be in a different format with the wrong
-      extension. Try swapping it
-      <!-- prettier-ignore -->
-
-      <a
-        href="https://hack64.net/tools/swapper.php"
-        target="_blank"
-        class="text-primary-600 underline dark:text-primary-500 hover:no-underline"
-        >here</a
-      >
+      ROMs in any format (big-endian, little-endian, byte-swapped) are supported
       <h3 class="font-semibold text-gray-900 dark:text-white">Wii</h3>
       Must provide a WAD file. An N64 ROM doesn't need to be provided, the patcher
       will use the one in the WAD
