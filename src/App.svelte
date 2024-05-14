@@ -18,6 +18,9 @@
     Checkbox,
     Modal,
     Spinner,
+    Footer,
+    FooterLink,
+    FooterLinkGroup,
   } from "flowbite-svelte";
   let inputFile: File;
   let ver: string;
@@ -279,7 +282,9 @@
   }
 </script>
 
-<main class="flex min-h-screen items-center justify-center overflow-hidden">
+<main
+  class="flex h-screen flex-col items-center justify-center overflow-hidden"
+>
   <div
     class="container flex max-w-md flex-col items-center justify-center rounded border border-sky-500 p-8 dark:text-white"
   >
@@ -411,4 +416,20 @@
       />
     </div>
   </div>
+  <Footer>
+    <FooterLinkGroup
+      ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
+    >
+      <FooterLink href="https://fp-docs.starhaven.dev/" target="_blank"
+        >Manual</FooterLink
+      >
+      <FooterLink href="https://github.com/imaandrew/fp-site" target="_blank"
+        >Website GitHub</FooterLink
+      >
+      <FooterLink
+        href="https://github.com/imaandrew/fp-web-patcher"
+        target="_blank">Patcher GitHub</FooterLink
+      >
+    </FooterLinkGroup>
+  </Footer>
 </main>
