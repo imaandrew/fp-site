@@ -41,7 +41,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["wasm/", "pkg/", "dist/"],
+    ignores: ["dist/"],
   },
   {
     files: ["**/*.js"],

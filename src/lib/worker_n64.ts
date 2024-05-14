@@ -1,4 +1,4 @@
-import __wbg_init, { n64_decode } from "../../wasm/pkg";
+import __wbg_init, { n64_decode } from "fp-web-patcher";
 
 export type N64Settings = {
   input: Uint8Array;

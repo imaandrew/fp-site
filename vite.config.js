@@ -1,13 +1,7 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vite";
-import topLevelAwait from "vite-plugin-top-level-await";
-import wasm from "vite-plugin-wasm";
+import wasmPack from "vite-plugin-wasm-pack";
 
 export default defineConfig({
-  plugins: [svelte(), wasm(), topLevelAwait()],
-  worker: {
-    plugins: () => {
-      return [wasm(), topLevelAwait()];
-    },
-  },
+  plugins: [svelte(), wasmPack([], ["fp-web-patcher"])],
 });
