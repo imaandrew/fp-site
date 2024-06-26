@@ -55,7 +55,7 @@ importers:
         version: 2.3.0
       flowbite-svelte:
         specifier: ^0.46.1
-        version: 0.46.6(svelte@4.2.18)
+        version: 0.46.7(svelte@4.2.18)
       fp-web-patcher:
         specifier: ^0.4.4
         version: 0.4.4
@@ -1221,8 +1221,8 @@ packages:
   flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
 
-  flowbite-svelte@0.46.6:
-    resolution: {integrity: sha512-SUK+JpjVM/EeZ+bsfhEPFCzNpH2vgR8eHiRE02VmSkgKfucHcZEV16kSWaZMlDYR89N+J+/oBGyiuZ/KZ/xzXA==}
+  flowbite-svelte@0.46.7:
+    resolution: {integrity: sha512-yjCJb6b24/aFE4W9ePtGNbBBZ+CzxcchcRcWRCxFSEqb2nZhpYJZgSRRv0hPK2vUp2X4LFcezFU9czaiI8pZlg==}
     engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
     peerDependencies:
       svelte: ^3.55.1 || ^4.0.0
@@ -3616,7 +3616,7 @@ snapshots:
 
   flatted@3.3.1: {}
 
-  flowbite-svelte@0.46.6(svelte@4.2.18):
+  flowbite-svelte@0.46.7(svelte@4.2.18):
     dependencies:
       '@floating-ui/dom': 1.6.6
       apexcharts: 3.49.2
