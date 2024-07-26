@@ -425,6 +425,10 @@
     <FooterLinkGroup
       ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
     >
+      <FooterLink
+        href="https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com/fp-practice-saves.zip"
+        >Practice Saves</FooterLink
+      >
       <FooterLink href="https://fp-docs.starhaven.dev/" target="_blank"
         >Manual</FooterLink
       >
