@@ -52,7 +52,7 @@ importers:
         version: 2.43.0(eslint@9.8.0)(svelte@4.2.18)
       flowbite:
         specifier: ^2.3.0
-        version: 2.4.1(rollup@4.19.0)
+        version: 2.5.1(rollup@4.19.0)
       flowbite-svelte:
         specifier: ^0.46.1
         version: 0.46.15(rollup@4.19.0)(svelte@4.2.18)
@@ -1268,8 +1268,8 @@ packages:
     peerDependencies:
       svelte: ^3.55.1 || ^4.0.0 || ^5.0.0
 
-  flowbite@2.4.1:
-    resolution: {integrity: sha512-I++vDsSOOlzHNuxY2OcFMNVC4CNzpPU2K14YHJ81cYrANXdzgizqniMB/1KQ219x8fqw+S0msY9Q45ZSXDqAPw==}
+  flowbite@2.5.1:
+    resolution: {integrity: sha512-7jP1jy9c3QP7y+KU9lc8ueMkTyUdMDvRP+lteSWgY5TigSZjf9K1kqZxmqjhbx2gBnFQxMl1GAjVThCa8cEpKA==}
 
   foreground-child@3.2.1:
     resolution: {integrity: sha512-PXUUyLqrR2XCWICfv6ukppP96sdFwWbNEnfEMt7jNsISjMsvaLNinAHNDYyvkyU+SZG2BTSbT5NjG+vZslfGTA==}
@@ -3693,7 +3693,7 @@ snapshots:
   flowbite-datepicker@1.3.0(rollup@4.19.0):
     dependencies:
       '@rollup/plugin-node-resolve': 15.2.3(rollup@4.19.0)
-      flowbite: 2.4.1(rollup@4.19.0)
+      flowbite: 2.5.1(rollup@4.19.0)
     transitivePeerDependencies:
       - rollup
 
@@ -3701,13 +3701,13 @@ snapshots:
     dependencies:
       '@floating-ui/dom': 1.6.7
       apexcharts: 3.50.0
-      flowbite: 2.4.1(rollup@4.19.0)
+      flowbite: 2.5.1(rollup@4.19.0)
       svelte: 4.2.18
       tailwind-merge: 2.4.0
     transitivePeerDependencies:
       - rollup
 
-  flowbite@2.4.1(rollup@4.19.0):
+  flowbite@2.5.1(rollup@4.19.0):
     dependencies:
       '@popperjs/core': 2.11.8
       flowbite-datepicker: 1.3.0(rollup@4.19.0)
