@@ -32,8 +32,8 @@
   let platform: string;
   let disableButton = true;
   let returnZip: boolean;
-  let enableDarkFilter: boolean;
-  let enableWidescreen: boolean;
+  let enableDarkFilter = false;
+  let enableWidescreen = false;
   let clickOutsideModal = false;
   let showLoading = false;
   let buttonText = writable("Build");
@@ -132,6 +132,7 @@
           outFileName = `${tag}-${ver}.tar`;
         }
     }
+    blockBuild();
   }
 
   onMount(async () => {
