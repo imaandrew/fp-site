@@ -12,7 +12,10 @@ self.onmessage = (e: MessageEvent<N64Settings>) => {
     .then(() => {
       postMessage(n64_decode(rom, patch));
     })
-    .catch(() => {});
+    .catch((e) => {
+      console.error(e);
+      postMessage(e);
+    });
 };
 
 self.onerror = (e) => {

@@ -16,7 +16,10 @@ self.onmessage = (e: MessageEvent<WiiUSettings>) => {
     .then(() => {
       postMessage(wiiu_inject(e.data));
     })
-    .catch(() => {});
+    .catch((e) => {
+      console.error(e);
+      postMessage(e);
+    });
 };
 
 self.onerror = (e) => {

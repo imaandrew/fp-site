@@ -8,7 +8,9 @@
   } from "./lib/util";
   import { slide } from "svelte/transition";
   import { writable } from "svelte/store";
+  import { CloseCircleSolid } from "flowbite-svelte-icons";
   import {
+    Alert,
     Fileupload,
     Label,
     Helper,
@@ -36,7 +38,10 @@
   let enableWidescreen = false;
   let clickOutsideModal = false;
   let showLoading = false;
+  let isVisible = false;
   let buttonText = writable("Build");
+  let alertText = writable("");
+  let reloadAlert = 0;
 
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -173,8 +178,12 @@
     }
   }
 
-  function savePatchedFile(event: MessageEvent<Uint8Array>) {
-    saveUint8ArrayToFile(event.data, outFileName);
+  function savePatchedFile(event: Uint8Array) {
+    saveUint8ArrayToFile(event, outFileName);
+    reset();
+  }
+
+  function reset() {
     buttonText.set("Build");
     showLoading = false;
     disableButton = false;
@@ -184,6 +193,8 @@
     buttonText.set("Building...");
     showLoading = true;
     disableButton = true;
+    isVisible = false;
+    reloadAlert ^= 1;
     getS3File(`fp/${tag}/${ver}.xdelta`)
       .then(async (patchFile: Uint8Array) => {
         const input = await readFileAsUint8Array(inputFile);
@@ -207,8 +218,14 @@
                 type: "classic",
               });
 
-          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
-            savePatchedFile(event);
+          worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
+            if (typeof event.data === "string") {
+              alertText.set(event.data);
+              isVisible = true;
+              reset();
+            } else {
+              savePatchedFile(event.data);
+            }
             worker.terminate();
           };
 
@@ -247,8 +264,14 @@
                 type: "classic",
               });
 
-          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
-            savePatchedFile(event);
+          worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
+            if (typeof event.data === "string") {
+              alertText.set(event.data);
+              isVisible = true;
+              reset();
+            } else {
+              savePatchedFile(event.data);
+            }
             worker.terminate();
           };
 
@@ -284,8 +307,14 @@
                 type: "classic",
               });
 
-          worker.onmessage = (event: MessageEvent<Uint8Array>) => {
-            savePatchedFile(event);
+          worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
+            if (typeof event.data === "string") {
+              alertText.set(event.data);
+              isVisible = true;
+              reset();
+            } else {
+              savePatchedFile(event.data);
+            }
             worker.terminate();
           };
 
@@ -421,7 +450,16 @@
         color="green"
       />
     </div>
+    {#key reloadAlert}
+      {#if isVisible}
+        <Alert dismissable transition={slide} color="red" class="mt-6">
+          <CloseCircleSolid slot="icon" class="h-5 w-5" />
+          {$alertText}
+        </Alert>
+      {/if}
+    {/key}
   </div>
+
   <Footer>
     <FooterLinkGroup
       ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"

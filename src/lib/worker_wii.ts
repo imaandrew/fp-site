@@ -20,7 +20,10 @@ self.onmessage = (e: MessageEvent<WiiSettings>) => {
     .then(() => {
       postMessage(wii_inject(e.data));
     })
-    .catch(() => {});
+    .catch((e) => {
+      console.error(e);
+      postMessage(e);
+    });
 };
 
 self.onerror = (e) => {
