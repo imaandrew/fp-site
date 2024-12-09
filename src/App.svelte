@@ -114,12 +114,7 @@
   }
 
   function handleVersionChange() {
-    if (
-      tag === "" ||
-      ver === "" ||
-      tag == null ||
-      ver === "unk"
-    ) {
+    if (tag === "" || ver === "" || tag == null || ver === "unk") {
       return;
     }
     switch (platform) {
