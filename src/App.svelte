@@ -25,13 +25,13 @@
     FooterLinkGroup,
   } from "flowbite-svelte";
   let inputFile: File;
-  let ver: string = $state();
-  let tag: string = $state();
-  let channelId: string = $state();
-  let title: string = $state();
+  let ver: string = $state("");
+  let tag: string = $state("");
+  let channelId: string = $state("");
+  let title: string = $state("");
   let romHashMessage = $state("Choose base file");
-  let outFileName: string = $state();
-  let platform: string = $state();
+  let outFileName: string = $state("");
+  let platform: string = $state("n64");
   let disableButton = $state(true);
   let returnZip: boolean;
   let enableDarkFilter = $state(false);
@@ -141,7 +141,6 @@
   }
 
   onMount(async () => {
-    platform = "n64";
     tag = await getLatestTag();
   });
 
@@ -162,7 +161,7 @@
   }
 
   function blockBuild() {
-    if (ver === "unk" || ver == null || inputFile == null) {
+    if (ver === "unk" || ver == "" || inputFile == null) {
       disableButton = true;
     } else if (tag == null || tag === "") {
       disableButton = true;
@@ -453,9 +452,8 @@
     {#key reloadAlert}
       {#if isVisible}
         <Alert dismissable transition={slide} color="red" class="mt-6">
-          {#snippet icon()}
-            <CloseCircleSolid class="h-5 w-5" />
-          {/snippet}
+          <!-- TODO: Update slot=icon to svelte v5-->
+          <CloseCircleSolid slot="icon" class="h-5 w-5" />
           {$alertText}
         </Alert>
       {/if}
