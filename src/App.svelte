@@ -25,23 +25,23 @@
     FooterLinkGroup,
   } from "flowbite-svelte";
   let inputFile: File;
-  let ver: string;
-  let tag: string;
-  let channelId: string;
-  let title: string;
-  let romHashMessage = "Choose base file";
-  let outFileName: string;
-  let platform: string;
-  let disableButton = true;
+  let ver: string = $state("");
+  let tag: string = $state("");
+  let channelId: string = $state("");
+  let title: string = $state("");
+  let romHashMessage = $state("Choose base file");
+  let outFileName: string = $state("");
+  let platform: string = $state("n64");
+  let disableButton = $state(true);
   let returnZip: boolean;
-  let enableDarkFilter = false;
-  let enableWidescreen = false;
-  let clickOutsideModal = false;
-  let showLoading = false;
-  let isVisible = false;
+  let enableDarkFilter = $state(false);
+  let enableWidescreen = $state(false);
+  let clickOutsideModal = $state(false);
+  let showLoading = $state(false);
+  let isVisible = $state(false);
   let buttonText = writable("Build");
   let alertText = writable("");
-  let reloadAlert = 0;
+  let reloadAlert = $state(0);
 
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -114,13 +114,7 @@
   }
 
   function handleVersionChange() {
-    if (
-      tag === "" ||
-      ver === "" ||
-      outFileName === "" ||
-      tag == null ||
-      ver === "unk"
-    ) {
+    if (tag === "" || ver === "" || tag == null || ver === "unk") {
       return;
     }
     switch (platform) {
@@ -141,7 +135,6 @@
   }
 
   onMount(async () => {
-    platform = "n64";
     tag = await getLatestTag();
   });
 
@@ -162,7 +155,7 @@
   }
 
   function blockBuild() {
-    if (ver === "unk" || ver == null || inputFile == null) {
+    if (ver === "unk" || ver == "" || inputFile == null) {
       disableButton = true;
     } else if (tag == null || tag === "") {
       disableButton = true;
@@ -340,7 +333,7 @@
     <div class="w-5/6">
       <Label for="fileInput" class="pb-2"
         >{romHashMessage}
-        <button id="b3" on:click={() => (clickOutsideModal = true)}>
+        <button id="b3" onclick={() => (clickOutsideModal = true)}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -433,7 +426,7 @@
       {/if}
     </div>
     <div class="grid auto-cols-max grid-cols-5 items-center gap-4">
-      <div />
+      <div></div>
       <GradientButton
         type="submit"
         color="greenToBlue"
@@ -453,6 +446,7 @@
     {#key reloadAlert}
       {#if isVisible}
         <Alert dismissable transition={slide} color="red" class="mt-6">
+          <!-- TODO: Update slot=icon to svelte v5-->
           <CloseCircleSolid slot="icon" class="h-5 w-5" />
           {$alertText}
         </Alert>
