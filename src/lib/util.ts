@@ -54,7 +54,7 @@ export function readFileAsUint8Array(file: File): Promise<Uint8Array> {
     };
 
     reader.onerror = (event) => {
-      reject(event.target?.error);
+      reject(new Error(event.target?.error?.message));
     };
 
     reader.readAsArrayBuffer(file);

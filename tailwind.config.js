@@ -23,7 +23,8 @@ export default {
       },
     },
   },
-
+  /* eslint-disable @typescript-eslint/no-require-imports */
   plugins: [require("flowbite/plugin")],
+  /* eslint-enable @typescript-eslint/no-require-imports */
   darkMode: "class",
 };
