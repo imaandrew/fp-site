@@ -117,7 +117,6 @@
     if (
       tag === "" ||
       ver === "" ||
-      outFileName === "" ||
       tag == null ||
       ver === "unk"
     ) {
