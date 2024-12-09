@@ -454,7 +454,7 @@
       {#if isVisible}
         <Alert dismissable transition={slide} color="red" class="mt-6">
           {#snippet icon()}
-            <CloseCircleSolid  class="h-5 w-5" />
+            <CloseCircleSolid class="h-5 w-5" />
           {/snippet}
           {$alertText}
         </Alert>
