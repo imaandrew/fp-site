@@ -47,5 +47,5 @@
     "vite": "^6.0.0",
     "vite-plugin-wasm-pack": "github:imaandrew/vite-plugin-wasm-pack#working"
   },
-  "packageManager": "pnpm@9.15.3"
+  "packageManager": "pnpm@9.15.4"
 }
