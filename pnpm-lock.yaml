@@ -55,10 +55,10 @@ importers:
         version: 2.5.2(rollup@4.34.8)
       flowbite-svelte:
         specifier: ^0.48.0
-        version: 0.48.3(rollup@4.34.8)(svelte@5.20.2)
+        version: 0.48.4(rollup@4.34.8)(svelte@5.20.2)
       flowbite-svelte-icons:
         specifier: ^2.0.2
-        version: 2.0.2(svelte@5.20.2)(tailwind-merge@3.0.1)(tailwindcss@3.4.17)
+        version: 2.0.2(svelte@5.20.2)(tailwind-merge@3.0.2)(tailwindcss@3.4.17)
       fp-web-patcher:
         specifier: ^0.5.0
         version: 0.5.0
@@ -1296,8 +1296,8 @@ packages:
       tailwind-merge: ^2.3.0
       tailwindcss: ^3.4.3
 
-  flowbite-svelte@0.48.3:
-    resolution: {integrity: sha512-LjoKycMB0XBhzQiD6PhAvYfHVyAhUfXrTJIaI78A7cs1i/VrEcqqHjMaQbketfeoJjoxbQAXkZ8D7+x+Sjcxnw==}
+  flowbite-svelte@0.48.4:
+    resolution: {integrity: sha512-ivlBxNi2u9+D/nFeHs+vLJU6nYjKq/ooAwdXPP3qIlEnUyIl/hVsH87JtVWwVEgF31NwwQcZeKFkWd8K5DWiGw==}
     peerDependencies:
       svelte: ^3.55.1 || ^4.0.0 || ^5.0.0
 
@@ -1956,8 +1956,8 @@ packages:
     resolution: {integrity: sha512-h5IS/hKkuVCbKSieR9uQCj9w+zLHoPh+ce19bBYyqF53g6mnPB8sAtIbe1s9dh2S2fCmYX2xel1Ln3PJBbK4kw==}
     engines: {node: '>= 0.8.0'}
 
-  tailwind-merge@3.0.1:
-    resolution: {integrity: sha512-AvzE8FmSoXC7nC+oU5GlQJbip2UO7tmOhOfQyOmPhrStOGXHU08j8mZEHZ4BmCqY5dWTCo4ClWkNyRNx1wpT0g==}
+  tailwind-merge@3.0.2:
+    resolution: {integrity: sha512-l7z+OYZ7mu3DTqrL88RiKrKIqO3NcpEO8V/Od04bNpvk0kiIFndGEoqfuzvj4yuhRkHKjRkII2z+KS2HfPcSxw==}
 
   tailwindcss@3.4.17:
     resolution: {integrity: sha512-w33E2aCvSDP0tW9RZuNXadXlkHXqFzSkQew/aIa2i/Sj8fThxwovwlXHSPXTbAHwEIhBFXAedUhP2tueAKP8Og==}
@@ -3675,19 +3675,19 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  flowbite-svelte-icons@2.0.2(svelte@5.20.2)(tailwind-merge@3.0.1)(tailwindcss@3.4.17):
+  flowbite-svelte-icons@2.0.2(svelte@5.20.2)(tailwind-merge@3.0.2)(tailwindcss@3.4.17):
     dependencies:
       svelte: 5.20.2
-      tailwind-merge: 3.0.1
+      tailwind-merge: 3.0.2
       tailwindcss: 3.4.17
 
-  flowbite-svelte@0.48.3(rollup@4.34.8)(svelte@5.20.2):
+  flowbite-svelte@0.48.4(rollup@4.34.8)(svelte@5.20.2):
     dependencies:
       '@floating-ui/dom': 1.6.13
       apexcharts: 3.54.1
       flowbite: 3.1.2(rollup@4.34.8)
       svelte: 5.20.2
-      tailwind-merge: 3.0.1
+      tailwind-merge: 3.0.2
     transitivePeerDependencies:
       - rollup
 
@@ -4222,7 +4222,7 @@ snapshots:
     dependencies:
       svg.js: 2.7.1
 
-  tailwind-merge@3.0.1: {}
+  tailwind-merge@3.0.2: {}
 
   tailwindcss@3.4.17:
     dependencies:
