@@ -55,7 +55,7 @@ importers:
         version: 2.5.2(rollup@4.39.0)
       flowbite-svelte:
         specifier: ^0.48.0
-        version: 0.48.4(rollup@4.39.0)(svelte@5.25.8)
+        version: 0.48.5(rollup@4.39.0)(svelte@5.25.8)
       flowbite-svelte-icons:
         specifier: ^2.0.2
         version: 2.1.0(svelte@5.25.8)
@@ -1315,8 +1315,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@0.48.4:
-    resolution: {integrity: sha512-ivlBxNi2u9+D/nFeHs+vLJU6nYjKq/ooAwdXPP3qIlEnUyIl/hVsH87JtVWwVEgF31NwwQcZeKFkWd8K5DWiGw==}
+  flowbite-svelte@0.48.5:
+    resolution: {integrity: sha512-NBIUieH7nMbP6kKzqXcB+IJvF41uSjfO/yID+YQ/UEekdqDEQucB2IckcVByjKkCNG29kQx55t1FS3jh3zAzCg==}
     peerDependencies:
       svelte: ^3.55.1 || ^4.0.0 || ^5.0.0
 
@@ -1972,8 +1972,8 @@ packages:
     resolution: {integrity: sha512-h5IS/hKkuVCbKSieR9uQCj9w+zLHoPh+ce19bBYyqF53g6mnPB8sAtIbe1s9dh2S2fCmYX2xel1Ln3PJBbK4kw==}
     engines: {node: '>= 0.8.0'}
 
-  tailwind-merge@3.0.2:
-    resolution: {integrity: sha512-l7z+OYZ7mu3DTqrL88RiKrKIqO3NcpEO8V/Od04bNpvk0kiIFndGEoqfuzvj4yuhRkHKjRkII2z+KS2HfPcSxw==}
+  tailwind-merge@3.2.0:
+    resolution: {integrity: sha512-FQT/OVqCD+7edmmJpsgCsY820RTD5AkBryuG5IUqR5YQZSdj5xlH5nLgH7YPths7WsLPSpSBNneJdM8aS8aeFA==}
 
   tailwindcss@3.4.17:
     resolution: {integrity: sha512-w33E2aCvSDP0tW9RZuNXadXlkHXqFzSkQew/aIa2i/Sj8fThxwovwlXHSPXTbAHwEIhBFXAedUhP2tueAKP8Og==}
@@ -3712,13 +3712,13 @@ snapshots:
     dependencies:
       svelte: 5.25.8
 
-  flowbite-svelte@0.48.4(rollup@4.39.0)(svelte@5.25.8):
+  flowbite-svelte@0.48.5(rollup@4.39.0)(svelte@5.25.8):
     dependencies:
       '@floating-ui/dom': 1.6.13
       apexcharts: 3.54.1
       flowbite: 3.1.2(rollup@4.39.0)
       svelte: 5.25.8
-      tailwind-merge: 3.0.2
+      tailwind-merge: 3.2.0
     transitivePeerDependencies:
       - rollup
 
@@ -4252,7 +4252,7 @@ snapshots:
     dependencies:
       svg.js: 2.7.1
 
-  tailwind-merge@3.0.2: {}
+  tailwind-merge@3.2.0: {}
 
   tailwindcss@3.4.17:
     dependencies:
