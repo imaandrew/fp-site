@@ -20,7 +20,6 @@
     Checkbox,
     Modal,
     Spinner,
-    Footer,
     FooterLink,
     FooterLinkGroup,
   } from "flowbite-svelte";
@@ -348,7 +347,7 @@
           <span class="sr-only">Show file format information</span></button
         ></Label
       >
-      <Fileupload id="fileInput" class="mb-2" on:change={handleFileSelect} />
+      <Fileupload id="fileInput" class="mb-2" onchange={handleFileSelect} />
       <Helper>Z64, WAD, ZIP, or TAR.</Helper>
     </div>
 
@@ -370,35 +369,35 @@
     </Modal>
 
     <div class="platform-settings mb-6 grid gap-1">
-      <div class="flex items-center whitespace-nowrap py-5">
+      <div class="flex items-center py-5 whitespace-nowrap">
         <p class="mr-3 text-left">Output file:</p>
         <Input
           type="text"
           id="outfile"
           bind:value={outFileName}
-          on:change={blockBuild}
+          onchange={blockBuild}
           required
         />
       </div>
       {#if platform === "wii"}
         <div transition:slide>
-          <div class="flex items-center whitespace-nowrap pb-5">
+          <div class="flex items-center pb-5 whitespace-nowrap">
             <p class="mr-3 text-left">Channel title:</p>
             <Input
               type="text"
               id="channel-title"
               bind:value={title}
-              on:change={blockBuild}
+              onchange={blockBuild}
               required
             />
           </div>
-          <div class="flex items-center whitespace-nowrap pb-5">
+          <div class="flex items-center pb-5 whitespace-nowrap">
             <p class="mr-3 text-left">Channel id:</p>
             <Input
               type="text"
               id="channel-id"
               bind:value={channelId}
-              on:change={blockBuild}
+              onchange={blockBuild}
               required
             />
           </div>
@@ -411,13 +410,13 @@
               name="version"
               value="us"
               bind:group={ver}
-              on:change={handleVersionChange}>US</Radio
+              onchange={handleVersionChange}>US</Radio
             >
             <Radio
               name="version"
               value="jp"
               bind:group={ver}
-              on:change={handleVersionChange}>JP</Radio
+              onchange={handleVersionChange}>JP</Radio
             >
           </div>
           <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
@@ -433,7 +432,7 @@
         size="xl"
         class="col-span-3"
         disabled={disableButton}
-        on:click={() => buildFp()}
+        onclick={() => buildFp()}
       >
         {$buttonText}
       </GradientButton>
@@ -446,32 +445,31 @@
     {#key reloadAlert}
       {#if isVisible}
         <Alert dismissable transition={slide} color="red" class="mt-6">
-          <!-- TODO: Update slot=icon to svelte v5-->
-          <CloseCircleSolid slot="icon" class="h-5 w-5" />
+          {#snippet icon()}
+            <CloseCircleSolid class="h-5 w-5" />
+          {/snippet}
           {$alertText}
         </Alert>
       {/if}
     {/key}
   </div>
 
-  <Footer>
-    <FooterLinkGroup
-      ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0"
+  <FooterLinkGroup
+    class="mt-3 flex flex-wrap items-center text-sm text-gray-500 sm:mt-0 dark:text-gray-400"
+  >
+    <FooterLink
+      href="https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com/fp-practice-saves.zip"
+      >Practice Saves</FooterLink
     >
-      <FooterLink
-        href="https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com/fp-practice-saves.zip"
-        >Practice Saves</FooterLink
-      >
-      <FooterLink href="https://fp-docs.starhaven.dev/" target="_blank"
-        >Manual</FooterLink
-      >
-      <FooterLink href="https://github.com/imaandrew/fp-site" target="_blank"
-        >Website GitHub</FooterLink
-      >
-      <FooterLink
-        href="https://github.com/imaandrew/fp-web-patcher"
-        target="_blank">Patcher GitHub</FooterLink
-      >
-    </FooterLinkGroup>
-  </Footer>
+    <FooterLink href="https://fp-docs.starhaven.dev/" target="_blank"
+      >Manual</FooterLink
+    >
+    <FooterLink href="https://github.com/imaandrew/fp-site" target="_blank"
+      >Website GitHub</FooterLink
+    >
+    <FooterLink
+      href="https://github.com/imaandrew/fp-web-patcher"
+      target="_blank">Patcher GitHub</FooterLink
+    >
+  </FooterLinkGroup>
 </main>
