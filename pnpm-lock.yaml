@@ -55,7 +55,7 @@ importers:
         version: 3.1.2(rollup@4.45.1)
       flowbite-svelte:
         specifier: ^1.10.10
-        version: 1.10.21(rollup@4.45.1)(svelte@5.37.1)(tailwindcss@4.1.11)
+        version: 1.10.22(rollup@4.45.1)(svelte@5.37.1)(tailwindcss@4.1.11)
       flowbite-svelte-icons:
         specifier: ^2.2.1
         version: 2.2.1(svelte@5.37.1)
@@ -456,11 +456,11 @@ packages:
     resolution: {integrity: sha512-Ul5l+lHEcw3L5+k8POx6r74mxEYKG5kOb6Xpy2gCRW6zweT6TEhAf8vhxGgjhqrd/VO/Dirhsb+1hNpD1ue9hw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@floating-ui/core@1.7.2':
-    resolution: {integrity: sha512-wNB5ooIKHQc+Kui96jE/n69rHFWAVoxn5CAzL1Xdd8FG03cgY3MLO+GF9U3W737fYDSgPWA6MReKhBQBop6Pcw==}
+  '@floating-ui/core@1.7.3':
+    resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
 
-  '@floating-ui/dom@1.7.2':
-    resolution: {integrity: sha512-7cfaOQuCS27HD7DX+6ib2OrnW+b4ZBwDNnCcT0uTyidcmyWb03FnQqJybDBoCnpdxwBSfA94UAYlRCt7mV+TbA==}
+  '@floating-ui/dom@1.7.3':
+    resolution: {integrity: sha512-uZA413QEpNuhtb3/iIKoYMSK07keHPYeXF02Zhd6e213j+d1NamLix/mCLxBUDW/Gx52sPH2m+chlUsyaBs/Ag==}
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
@@ -1336,8 +1336,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@1.10.21:
-    resolution: {integrity: sha512-tvapM5cNK3uL6ydZcqB4RcniSVDor41OYqqQwb2R5zx2ewuj6bsFhJEXGmxGarlZUo1CXB9XJqJvtePKOao9hg==}
+  flowbite-svelte@1.10.22:
+    resolution: {integrity: sha512-EKOlLT7YvAclLaxmR9stb9Ejpr5J7FELeznvuLcViZpCcs49xvraKFSi26+A4uJ09QaN8pNKacxS3J4Ws6bD+A==}
     peerDependencies:
       svelte: ^5.29.0
       tailwindcss: ^4.1.4
@@ -2609,13 +2609,13 @@ snapshots:
       '@eslint/core': 0.15.1
       levn: 0.4.1
 
-  '@floating-ui/core@1.7.2':
+  '@floating-ui/core@1.7.3':
     dependencies:
       '@floating-ui/utils': 0.2.10
 
-  '@floating-ui/dom@1.7.2':
+  '@floating-ui/dom@1.7.3':
     dependencies:
-      '@floating-ui/core': 1.7.2
+      '@floating-ui/core': 1.7.3
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
@@ -3615,9 +3615,9 @@ snapshots:
       svelte: 5.37.1
       tailwind-merge: 3.3.1
 
-  flowbite-svelte@1.10.21(rollup@4.45.1)(svelte@5.37.1)(tailwindcss@4.1.11):
+  flowbite-svelte@1.10.22(rollup@4.45.1)(svelte@5.37.1)(tailwindcss@4.1.11):
     dependencies:
-      '@floating-ui/dom': 1.7.2
+      '@floating-ui/dom': 1.7.3
       '@floating-ui/utils': 0.2.10
       apexcharts: 4.7.0
       clsx: 2.1.1
