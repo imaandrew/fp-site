@@ -55,7 +55,7 @@ importers:
         version: 3.1.2(rollup@4.50.1)
       flowbite-svelte:
         specifier: ^1.10.10
-        version: 1.13.7(rollup@4.50.1)(svelte@5.38.7)(tailwindcss@4.1.13)
+        version: 1.13.8(rollup@4.50.1)(svelte@5.38.7)(tailwindcss@4.1.13)
       flowbite-svelte-icons:
         specifier: ^2.2.1
         version: 2.3.0(svelte@5.38.7)
@@ -1091,8 +1091,8 @@ packages:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
 
-  apexcharts@5.3.4:
-    resolution: {integrity: sha512-N0gNh8uLu/BN8N+BCphNK+gZAoSoUtDDn1jFGB+3+EMcv8s6vajuP3W0g4dMLTRp6chFkjMmQK3uD8pz4ISmLA==}
+  apexcharts@5.3.5:
+    resolution: {integrity: sha512-I04DY/WBZbJgJD2uixeV5EzyiL+J5LgKQXEu8rctqAwyRmKv44aDVeofJoLdTJe3ao4r2KEQfCgtVzXn6pqirg==}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -1354,8 +1354,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@1.13.7:
-    resolution: {integrity: sha512-P18k7zTW9vC/5PfCjdtHCQKgX2lir6y6c4LTOtFz1+DxKjyttglNzxYlB3/xogtU6Gka9oTvQ5xe1iMw4UL4Xg==}
+  flowbite-svelte@1.13.8:
+    resolution: {integrity: sha512-ZOUsoqycnKmraVsETJoX+hGKxEkNZeOuU93qAHrh4RafpX3eW3PYCrJmElRvzCEUEHsjdTWTgMeXWzA6r6HNYg==}
     peerDependencies:
       svelte: ^5.29.0
       tailwindcss: ^4.1.4
@@ -3349,7 +3349,7 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
-  apexcharts@5.3.4:
+  apexcharts@5.3.5:
     dependencies:
       '@svgdotjs/svg.draggable.js': 3.0.6(@svgdotjs/svg.js@3.2.4)
       '@svgdotjs/svg.filter.js': 3.0.9
@@ -3647,11 +3647,11 @@ snapshots:
       svelte: 5.38.7
       tailwind-merge: 3.3.1
 
-  flowbite-svelte@1.13.7(rollup@4.50.1)(svelte@5.38.7)(tailwindcss@4.1.13):
+  flowbite-svelte@1.13.8(rollup@4.50.1)(svelte@5.38.7)(tailwindcss@4.1.13):
     dependencies:
       '@floating-ui/dom': 1.7.4
       '@floating-ui/utils': 0.2.10
-      apexcharts: 5.3.4
+      apexcharts: 5.3.5
       clsx: 2.1.1
       date-fns: 4.1.0
       flowbite: 3.1.2(rollup@4.50.1)
