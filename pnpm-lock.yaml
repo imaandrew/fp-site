@@ -55,7 +55,7 @@ importers:
         version: 3.1.2(rollup@4.52.0)
       flowbite-svelte:
         specifier: ^1.10.10
-        version: 1.13.16(rollup@4.52.0)(svelte@5.39.6)(tailwindcss@4.1.13)
+        version: 1.14.6(rollup@4.52.0)(svelte@5.39.6)(tailwindcss@4.1.13)
       flowbite-svelte-icons:
         specifier: ^2.2.1
         version: 2.3.0(svelte@5.39.6)
@@ -1347,8 +1347,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@1.13.16:
-    resolution: {integrity: sha512-G9ZTdAYjjElc8HX57MrwBNK1QkSpwA/k5SY2vm9/087t7k/H1r+DPBadfIeTxzrmyIofaCbs5nTtjW+4OkSlbw==}
+  flowbite-svelte@1.14.6:
+    resolution: {integrity: sha512-y67C2GQKWgKQ60jfO3fIwdv1VtCy6MUqnzHp3IQPKq4Uz787SNbNAsIFaMQ4ut45Vn9TFCwI4X13sAdvrUNMkA==}
     peerDependencies:
       svelte: ^5.29.0
       tailwindcss: ^4.1.4
@@ -3627,13 +3627,14 @@ snapshots:
       svelte: 5.39.6
       tailwind-merge: 3.3.1
 
-  flowbite-svelte@1.13.16(rollup@4.52.0)(svelte@5.39.6)(tailwindcss@4.1.13):
+  flowbite-svelte@1.14.6(rollup@4.52.0)(svelte@5.39.6)(tailwindcss@4.1.13):
     dependencies:
       '@floating-ui/dom': 1.7.4
       '@floating-ui/utils': 0.2.10
       apexcharts: 5.3.5
       clsx: 2.1.1
       date-fns: 4.1.0
+      esm-env: 1.2.2
       flowbite: 3.1.2(rollup@4.52.0)
       svelte: 5.39.6
       tailwind-merge: 3.3.1
