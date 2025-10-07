@@ -55,7 +55,7 @@ importers:
         version: 3.1.2(rollup@4.52.4)
       flowbite-svelte:
         specifier: ^1.10.10
-        version: 1.17.2(rollup@4.52.4)(svelte@5.39.9)(tailwindcss@4.1.14)
+        version: 1.17.3(rollup@4.52.4)(svelte@5.39.9)(tailwindcss@4.1.14)
       flowbite-svelte-icons:
         specifier: ^2.2.1
         version: 2.3.0(svelte@5.39.9)
@@ -1347,8 +1347,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@1.17.2:
-    resolution: {integrity: sha512-vCaYBfvo/h6vannZKl6MEvlkqGetBCuPFDeu89TC7WFtKAF9V3iCWI1lZzsvpF7XLpFIn8qHBYLbneVSf51LiQ==}
+  flowbite-svelte@1.17.3:
+    resolution: {integrity: sha512-D9Z0cs4HTReGd098yx3691UbAXjozsJpw22WNbbfJy6HOHGltv8fKFB9uvYFg2XyU4RLK7RE0JAUgj8J792bSQ==}
     peerDependencies:
       svelte: ^5.29.0
       tailwindcss: ^4.1.4
@@ -3624,7 +3624,7 @@ snapshots:
       svelte: 5.39.9
       tailwind-merge: 3.3.1
 
-  flowbite-svelte@1.17.2(rollup@4.52.4)(svelte@5.39.9)(tailwindcss@4.1.14):
+  flowbite-svelte@1.17.3(rollup@4.52.4)(svelte@5.39.9)(tailwindcss@4.1.14):
     dependencies:
       '@floating-ui/dom': 1.7.4
       '@floating-ui/utils': 0.2.10
