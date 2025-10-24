@@ -55,7 +55,7 @@ importers:
         version: 3.1.2(rollup@4.52.5)
       flowbite-svelte:
         specifier: ^1.10.10
-        version: 1.18.1(rollup@4.52.5)(svelte@5.41.3)(tailwindcss@4.1.16)
+        version: 1.18.2(rollup@4.52.5)(svelte@5.41.3)(tailwindcss@4.1.16)
       flowbite-svelte-icons:
         specifier: ^2.2.1
         version: 2.3.0(svelte@5.41.3)
@@ -177,6 +177,7 @@ packages:
   '@aws-sdk/middleware-expect-continue@3.916.0':
     resolution: {integrity: sha512-p7TMLZZ/j5NbC7/cz7xNgxLz/OHYuh91MeCZdCedJiyh3rx6gunFtl9eiDtrh+Y8hjs0EwR0zYIuhd6pL1O8zg==}
     engines: {node: '>=18.0.0'}
+    deprecated: '@aws-sdk/middleware-expect-continue v3.916.0 contains an accidental console.log statement (https://github.com/aws/aws-sdk-js-v3/pull/7454), please upgrade to v3.917.0+'
 
   '@aws-sdk/middleware-flexible-checksums@3.916.0':
     resolution: {integrity: sha512-CBRRg6slHHBYAm26AWY/pECHK0vVO/peDoNhZiAzUNt4jV6VftotjszEJ904pKGOr7/86CfZxtCnP3CCs3lQjA==}
@@ -1343,8 +1344,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  flowbite-svelte@1.18.1:
-    resolution: {integrity: sha512-7WArsILWKR7MKlnw68S8Q3aw40RjRBA0fn3QJfTlp43LXmTsnywyA+7J3zWZR6uXnV+8nV8rNV3UkndVjB/xZQ==}
+  flowbite-svelte@1.18.2:
+    resolution: {integrity: sha512-0MoLHduszq9NWhxz7Y3DHLPJYeY2itOjcRbr6+n12TvHR5ajM88g4wZuT6eYH4Gj2f7cq8N1gbbV2WkYZKxTGA==}
     peerDependencies:
       svelte: ^5.29.0
       tailwindcss: ^4.1.4
@@ -3603,7 +3604,7 @@ snapshots:
       svelte: 5.41.3
       tailwind-merge: 3.3.1
 
-  flowbite-svelte@1.18.1(rollup@4.52.5)(svelte@5.41.3)(tailwindcss@4.1.16):
+  flowbite-svelte@1.18.2(rollup@4.52.5)(svelte@5.41.3)(tailwindcss@4.1.16):
     dependencies:
       '@floating-ui/dom': 1.7.4
       '@floating-ui/utils': 0.2.10
