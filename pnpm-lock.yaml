@@ -22,7 +22,7 @@ importers:
         version: 4.1.18(vite@7.3.1(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.6.1))
       '@tsconfig/svelte':
         specifier: ^5.0.4
-        version: 5.0.7
+        version: 5.0.8
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -1029,8 +1029,8 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@tsconfig/svelte@5.0.7':
-    resolution: {integrity: sha512-NOtJF9LQnV7k6bpzcXwL/rXdlFHvAT9e0imrftiMc6/+FUNBHRZ8UngDrM+jciA6ENzFYNoFs8rfwumuGF+Dhw==}
+  '@tsconfig/svelte@5.0.8':
+    resolution: {integrity: sha512-UkNnw1/oFEfecR8ypyHIQuWYdkPvHiwcQ78sh+ymIiYoF+uc5H1UBetbjyqT+vgGJ3qQN6nhucJviX6HesWtKQ==}
 
   '@types/eslint-config-prettier@6.11.3':
     resolution: {integrity: sha512-3wXCiM8croUnhg9LdtZUJQwNcQYGWxxdOWDjPe1ykCqJFPVpzAKfs/2dgSoCtAvdPeaponcWPI7mPcGGp9dkKQ==}
@@ -3207,7 +3207,7 @@ snapshots:
       tailwindcss: 4.1.18
       vite: 7.3.1(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.6.1)
 
-  '@tsconfig/svelte@5.0.7': {}
+  '@tsconfig/svelte@5.0.8': {}
 
   '@types/eslint-config-prettier@6.11.3': {}
 
