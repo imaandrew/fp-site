@@ -73,10 +73,10 @@ importers:
         version: 4.3.0(prettier@3.6.2)(typescript@5.8.3)
       prettier-plugin-svelte:
         specifier: ^3.4.0
-        version: 3.4.1(prettier@3.6.2)(svelte@5.51.3)
+        version: 3.5.0(prettier@3.6.2)(svelte@5.51.3)
       prettier-plugin-tailwindcss:
         specifier: ^0.6.14
-        version: 0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.4.1(prettier@3.6.2)(svelte@5.51.3))(prettier@3.6.2)
+        version: 0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.51.3))(prettier@3.6.2)
       svelte:
         specifier: ^5.36.8
         version: 5.51.3
@@ -1701,8 +1701,8 @@ packages:
       vue-tsc:
         optional: true
 
-  prettier-plugin-svelte@3.4.1:
-    resolution: {integrity: sha512-xL49LCloMoZRvSwa6IEdN2GV6cq2IqpYGstYtMT+5wmml1/dClEoI0MZR78MiVPpu6BdQFfN0/y73yO6+br5Pg==}
+  prettier-plugin-svelte@3.5.0:
+    resolution: {integrity: sha512-2lLO/7EupnjO/95t+XZesXs8Bf3nYLIDfCo270h5QWbj/vjLqmrQ1LiRk9LPggxSDsnVYfehamZNf+rgQYApZg==}
     peerDependencies:
       prettier: ^3.0.0
       svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
@@ -3874,17 +3874,17 @@ snapshots:
       prettier: 3.6.2
       typescript: 5.8.3
 
-  prettier-plugin-svelte@3.4.1(prettier@3.6.2)(svelte@5.51.3):
+  prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.51.3):
     dependencies:
       prettier: 3.6.2
       svelte: 5.51.3
 
-  prettier-plugin-tailwindcss@0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.4.1(prettier@3.6.2)(svelte@5.51.3))(prettier@3.6.2):
+  prettier-plugin-tailwindcss@0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.51.3))(prettier@3.6.2):
     dependencies:
       prettier: 3.6.2
     optionalDependencies:
       prettier-plugin-organize-imports: 4.3.0(prettier@3.6.2)(typescript@5.8.3)
-      prettier-plugin-svelte: 3.4.1(prettier@3.6.2)(svelte@5.51.3)
+      prettier-plugin-svelte: 3.5.0(prettier@3.6.2)(svelte@5.51.3)
 
   prettier@3.6.2: {}
 
