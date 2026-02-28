@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { Fileupload, Helper, Label } from "flowbite-svelte";
   import { getContext } from "svelte";
-  import { Label, Fileupload, Helper } from "flowbite-svelte";
+
+  import { ROM_CRC } from "$lib/constants";
   import type { PatcherState } from "$lib/patcherState.svelte";
   import { getCrc } from "$lib/util";
-  import { ROM_CRC } from "$lib/constants";
 
   const patcher: PatcherState = getContext("patcher");
 

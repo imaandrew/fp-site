@@ -1,4 +1,5 @@
 import { buf } from "crc-32";
+
 import { ROM_HEADER_BYTESWAPPED, ROM_HEADER_LITTLEENDIAN } from "./constants";
 
 export async function getS3File(path: string): Promise<Uint8Array> {

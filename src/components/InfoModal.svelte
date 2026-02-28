@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { getContext } from "svelte";
-  import type { PatcherState } from "$lib/patcherState.svelte";
   import { Modal } from "flowbite-svelte";
+  import { getContext } from "svelte";
+
+  import type { PatcherState } from "$lib/patcherState.svelte";
 
   const patcher: PatcherState = getContext("patcher");
 </script>

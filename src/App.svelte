@@ -1,5 +1,12 @@
 <script lang="ts">
+  import { Label } from "flowbite-svelte";
   import { onMount, setContext } from "svelte";
+
+  import { PatcherState } from "$lib/patcherState.svelte";
+  import { n64Patcher } from "$lib/platforms/n64";
+  import type { PlatformPatcher } from "$lib/platforms/types";
+  import { createWiiPatcher } from "$lib/platforms/wii";
+  import { createWiiUPatcher } from "$lib/platforms/wiiu";
   import {
     getLatestTag,
     getS3File,
@@ -7,20 +14,14 @@
     saveUint8ArrayToFile,
     swapBytes,
   } from "$lib/util";
-  import { Label } from "flowbite-svelte";
-
-  import { n64Patcher } from "$lib/platforms/n64";
-  import { createWiiPatcher } from "$lib/platforms/wii";
-  import { createWiiUPatcher } from "$lib/platforms/wiiu";
   import { setupWorkerHandler } from "$lib/worker";
 
-  import { PatcherState } from "$lib/patcherState.svelte";
-  import FileUploader from "./components/FileUploader.svelte";
-  import PlatformSettings from "./components/PlatformSettings.svelte";
   import BuildControls from "./components/BuildControls.svelte";
-  import InfoModal from "./components/InfoModal.svelte";
+  import FileUploader from "./components/FileUploader.svelte";
   import Footer from "./components/Footer.svelte";
-  import type { PlatformPatcher } from "$lib/platforms/types";
+  import InfoModal from "./components/InfoModal.svelte";
+  import PlatformSettings from "./components/PlatformSettings.svelte";
+
   const patcher = new PatcherState();
   setContext("patcher", patcher);
 

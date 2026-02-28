@@ -1,5 +1,6 @@
 import { getS3File } from "$lib/util";
 import { createWorker } from "$lib/worker";
+
 import type { PlatformPatcher } from "./types";
 
 export function createWiiUPatcher(

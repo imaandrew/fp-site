@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { GradientButton, Spinner, Alert } from "flowbite-svelte";
+  import { Alert, GradientButton, Spinner } from "flowbite-svelte";
   import { CloseCircleSolid } from "flowbite-svelte-icons";
+  import { getContext } from "svelte";
   import { slide } from "svelte/transition";
 
   import type { PatcherState } from "$lib/patcherState.svelte";
-  import { getContext } from "svelte";
 
   const patcher: PatcherState = getContext("patcher");
   let { buildFn }: { buildFn: () => void } = $props();

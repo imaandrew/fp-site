@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FooterLinkGroup, FooterLink } from "flowbite-svelte";
+  import { FooterLink, FooterLinkGroup } from "flowbite-svelte";
 </script>
 
 <FooterLinkGroup

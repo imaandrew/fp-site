@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { Input, Radio, Checkbox } from "flowbite-svelte";
+  import { Checkbox, Input, Radio } from "flowbite-svelte";
   import { getContext } from "svelte";
   import { slide } from "svelte/transition";
+
   import type { PatcherState } from "$lib/patcherState.svelte";
 
   const patcher: PatcherState = getContext("patcher");
