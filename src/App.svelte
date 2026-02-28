@@ -41,7 +41,7 @@
   async function buildFp() {
     patcher.buttonText = "Building...";
     patcher.showLoading = true;
-    patcher.disableButton = true;
+    patcher.building = true;
     patcher.isAlertVisible = false;
     patcher.reloadAlert++;
     if (!patcher.inputFile) return;

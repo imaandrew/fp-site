@@ -29,6 +29,8 @@ export class PatcherState {
   alertText = $state("");
   reloadAlert = $state(0);
 
+  building = $state(false);
+
   outFileName: string = $derived.by(() => {
     if (this.tag === "" || this.ver === "") {
       return "";
@@ -49,7 +51,8 @@ export class PatcherState {
   });
 
   disableButton: boolean = $derived(
-    this.ver === "" ||
+    this.building ||
+      this.ver === "" ||
       this.inputFile === null ||
       this.tag === "" ||
       this.outFileName === "" ||
@@ -59,6 +62,7 @@ export class PatcherState {
   reset() {
     this.buttonText = "Build";
     this.showLoading = false;
+    this.building = false;
   }
 
   showError(message: string) {
