@@ -5,7 +5,6 @@ export class PatcherState {
   channelId: string = $state("");
   title: string = $state("");
   romHashMessage = $state("Choose base file");
-  outFileName: string = $state("");
   platform: string = $state("n64");
   returnZip = $state(false);
   enableDarkFilter = $state(false);
@@ -17,13 +16,32 @@ export class PatcherState {
   alertText = $state("");
   reloadAlert = $state(0);
 
+  outFileName: string = $derived.by(() => {
+    if (this.tag === "" || this.ver === "" || this.ver === "unk") {
+      return "";
+    }
+
+    switch (this.platform) {
+      case "n64":
+        return `${this.tag}-${this.ver}.z64`;
+      case "wii":
+        return `${this.tag}-${this.ver}.wad`;
+      case "wiiu":
+        if (this.returnZip) {
+          return `${this.tag}-${this.ver}.zip`;
+        } else {
+          return `${this.tag}-${this.ver}.tar`;
+        }
+    }
+
+    return "";
+  });
+
   disableButton: boolean = $derived(
     this.ver === "unk" ||
       this.ver === "" ||
       this.inputFile == null ||
-      this.tag == null ||
       this.tag === "" ||
-      this.outFileName == null ||
       this.outFileName === "" ||
       (this.platform === "wii" && (!this.title || !this.channelId)),
   );
