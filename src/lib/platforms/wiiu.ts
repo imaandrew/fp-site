@@ -1,5 +1,4 @@
 import { getS3File } from "$lib/util";
-import { createWorker } from "$lib/worker";
 
 import type { PlatformPatcher } from "./types";
 
@@ -26,7 +25,10 @@ export function createWiiUPatcher(
         getS3File(`${frameLayoutPath}.arc`),
       ]);
 
-      const worker = createWorker("./worker_wiiu.ts");
+      const worker = new Worker(
+        new URL("$lib/worker_wiiu.ts", import.meta.url),
+        { type: "module" },
+      );
       worker.postMessage({
         input_archive: input,
         xdelta_patch: patchFile,

@@ -1,5 +1,4 @@
 import { getS3File } from "$lib/util";
-import { createWorker } from "$lib/worker";
 
 import type { PlatformPatcher } from "./types";
 
@@ -21,7 +20,10 @@ export function createWiiPatcher(
       concatPatch[memPatch.length - 1] = 10;
       concatPatch.set(hbPatch, memPatch.length);
 
-      const worker = createWorker("./worker_wii.ts");
+      const worker = new Worker(
+        new URL("$lib/worker_wii.ts", import.meta.url),
+        { type: "module" },
+      );
       worker.postMessage({
         wad: input,
         xdelta_patch: patchFile,
