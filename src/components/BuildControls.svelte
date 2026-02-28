@@ -3,7 +3,7 @@
   import { CloseCircleSolid } from "flowbite-svelte-icons";
   import { slide } from "svelte/transition";
 
-  import type { PatcherState } from "../lib/patcherState.svelte";
+  import type { PatcherState } from "$lib/patcherState.svelte";
   import { getContext } from "svelte";
 
   const patcher: PatcherState = getContext("patcher");

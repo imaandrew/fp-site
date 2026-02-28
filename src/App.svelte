@@ -6,21 +6,21 @@
     readFileAsUint8Array,
     saveUint8ArrayToFile,
     swapBytes,
-  } from "./lib/util";
+  } from "$lib/util";
   import { Label } from "flowbite-svelte";
 
-  import { n64Patcher } from "./lib/platforms/n64";
-  import { createWiiPatcher } from "./lib/platforms/wii";
-  import { createWiiUPatcher } from "./lib/platforms/wiiu";
-  import { setupWorkerHandler } from "./lib/worker";
+  import { n64Patcher } from "$lib/platforms/n64";
+  import { createWiiPatcher } from "$lib/platforms/wii";
+  import { createWiiUPatcher } from "$lib/platforms/wiiu";
+  import { setupWorkerHandler } from "$lib/worker";
 
-  import { PatcherState } from "./lib/patcherState.svelte";
+  import { PatcherState } from "$lib/patcherState.svelte";
   import FileUploader from "./components/FileUploader.svelte";
   import PlatformSettings from "./components/PlatformSettings.svelte";
   import BuildControls from "./components/BuildControls.svelte";
   import InfoModal from "./components/InfoModal.svelte";
   import Footer from "./components/Footer.svelte";
-  import type { PlatformPatcher } from "./lib/platforms/types";
+  import type { PlatformPatcher } from "$lib/platforms/types";
   const patcher = new PatcherState();
   setContext("patcher", patcher);
 

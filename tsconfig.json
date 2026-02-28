@@ -9,7 +9,10 @@
     "checkJs": true,
     "isolatedModules": true,
     "noImplicitAny": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "paths": {
+      "$lib/*": ["./src/lib/*"]
+    }
   },
   "include": [
     "src/**/*.ts",
@@ -18,5 +21,9 @@
     "vite.config.js",
     "svelte.config.js"
   ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
