@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, setContext } from "svelte";
   import {
     getLatestTag,
     getCrc,
@@ -7,7 +7,6 @@
     readFileAsUint8Array,
   } from "./lib/util";
   import { slide } from "svelte/transition";
-  import { writable } from "svelte/store";
   import { CloseCircleSolid } from "flowbite-svelte-icons";
   import {
     Alert,
@@ -23,24 +22,10 @@
     FooterLink,
     FooterLinkGroup,
   } from "flowbite-svelte";
-  let inputFile: File;
-  let ver: string = $state("");
-  let tag: string = $state("");
-  let channelId: string = $state("");
-  let title: string = $state("");
-  let romHashMessage = $state("Choose base file");
-  let outFileName: string = $state("");
-  let platform: string = $state("n64");
-  let disableButton = $state(true);
-  let returnZip: boolean;
-  let enableDarkFilter = $state(false);
-  let enableWidescreen = $state(false);
-  let clickOutsideModal = $state(false);
-  let showLoading = $state(false);
-  let isVisible = $state(false);
-  let buttonText = writable("Build");
-  let alertText = writable("");
-  let reloadAlert = $state(0);
+
+  import { PatcherState } from "./lib/patcherState.svelte";
+  const patcher = new PatcherState();
+  setContext("patcher", patcher);
 
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -51,10 +36,9 @@
     if (f) {
       switch (target.id) {
         case "fileInput":
-          inputFile = f;
+          patcher.inputFile = f;
           await assignFileHash(f);
           handleVersionChange();
-          blockBuild();
           break;
       }
     }
@@ -67,43 +51,43 @@
         case 0xa7f5cd7e:
         case 0xd56d1c89:
         case 0xa4c948bf:
-          ver = "us";
-          romHashMessage = "Valid US ROM";
-          platform = "n64";
+          patcher.ver = "us";
+          patcher.romHashMessage = "Valid US ROM";
+          patcher.platform = "n64";
           break;
         case 0xbd60ca66:
         case 0x1fb7e59a:
         case 0xca72bffc:
-          ver = "jp";
-          romHashMessage = "Valid JP ROM";
-          platform = "n64";
+          patcher.ver = "jp";
+          patcher.romHashMessage = "Valid JP ROM";
+          patcher.platform = "n64";
           break;
         case 0xd469a9e1:
-          ver = "us";
-          romHashMessage = "Valid US WAD";
-          platform = "wii";
-          channelId = "FPUS";
-          title = "fp-US";
+          patcher.ver = "us";
+          patcher.romHashMessage = "Valid US WAD";
+          patcher.platform = "wii";
+          patcher.channelId = "FPUS";
+          patcher.title = "fp-US";
           break;
         case 0x6566e39a:
-          ver = "jp";
-          romHashMessage = "Valid JP WAD";
-          platform = "wii";
-          channelId = "FPJP";
-          title = "fp-JP";
+          patcher.ver = "jp";
+          patcher.romHashMessage = "Valid JP WAD";
+          patcher.platform = "wii";
+          patcher.channelId = "FPJP";
+          patcher.title = "fp-JP";
           break;
         default:
           if (file.name.split(".").pop() === "zip") {
-            romHashMessage = "Wii U Archive";
-            platform = "wiiu";
-            returnZip = true;
+            patcher.romHashMessage = "Wii U Archive";
+            patcher.platform = "wiiu";
+            patcher.returnZip = true;
           } else if (file.name.split(".").pop() === "tar") {
-            romHashMessage = "Wii U Archive";
-            platform = "wiiu";
-            returnZip = false;
+            patcher.romHashMessage = "Wii U Archive";
+            patcher.platform = "wiiu";
+            patcher.returnZip = false;
           } else {
-            ver = "unk";
-            romHashMessage = "Unknown base file";
+            patcher.ver = "unk";
+            patcher.romHashMessage = "Unknown base file";
           }
           break;
       }
@@ -113,28 +97,32 @@
   }
 
   function handleVersionChange() {
-    if (tag === "" || ver === "" || tag == null || ver === "unk") {
+    if (
+      patcher.tag === "" ||
+      patcher.ver === "" ||
+      patcher.tag == null ||
+      patcher.ver === "unk"
+    ) {
       return;
     }
-    switch (platform) {
+    switch (patcher.platform) {
       case "n64":
-        outFileName = `${tag}-${ver}.z64`;
+        patcher.outFileName = `${patcher.tag}-${patcher.ver}.z64`;
         break;
       case "wii":
-        outFileName = `${tag}-${ver}.wad`;
+        patcher.outFileName = `${patcher.tag}-${patcher.ver}.wad`;
         break;
       case "wiiu":
-        if (returnZip) {
-          outFileName = `${tag}-${ver}.zip`;
+        if (patcher.returnZip) {
+          patcher.outFileName = `${patcher.tag}-${patcher.ver}.zip`;
         } else {
-          outFileName = `${tag}-${ver}.tar`;
+          patcher.outFileName = `${patcher.tag}-${patcher.ver}.tar`;
         }
     }
-    blockBuild();
   }
 
   onMount(async () => {
-    tag = await getLatestTag();
+    patcher.tag = await getLatestTag();
   });
 
   // https://stackoverflow.com/a/62176999
@@ -153,43 +141,20 @@
     URL.revokeObjectURL(url);
   }
 
-  function blockBuild() {
-    if (ver === "unk" || ver == "" || inputFile == null) {
-      disableButton = true;
-    } else if (tag == null || tag === "") {
-      disableButton = true;
-    } else if (outFileName == null || outFileName === "") {
-      disableButton = true;
-    } else if (
-      platform === "wii" &&
-      (title == null || title === "" || channelId == null || channelId === "")
-    ) {
-      disableButton = true;
-    } else {
-      disableButton = false;
-    }
-  }
-
   function savePatchedFile(event: Uint8Array) {
-    saveUint8ArrayToFile(event, outFileName);
-    reset();
-  }
-
-  function reset() {
-    buttonText.set("Build");
-    showLoading = false;
-    disableButton = false;
+    saveUint8ArrayToFile(event, patcher.outFileName);
+    patcher.reset();
   }
 
   function buildFp() {
-    buttonText.set("Building...");
-    showLoading = true;
-    disableButton = true;
-    isVisible = false;
-    reloadAlert ^= 1;
-    getS3File(`fp/${tag}/${ver}.xdelta`)
+    patcher.buttonText = "Building...";
+    patcher.showLoading = true;
+    patcher.disableButton = true;
+    patcher.isVisible = false;
+    patcher.reloadAlert ^= 1;
+    getS3File(`fp/${patcher.tag}/${patcher.ver}.xdelta`)
       .then(async (patchFile: Uint8Array) => {
-        const input = await readFileAsUint8Array(inputFile);
+        const input = await readFileAsUint8Array(patcher.inputFile);
         const dataView = new DataView(input.buffer);
         const head = dataView.getUint32(0);
         if (head == 0x37804012) {
@@ -201,7 +166,7 @@
             dataView.setUint32(i, dataView.getUint32(i), true);
           }
         }
-        if (platform === "n64") {
+        if (patcher.platform === "n64") {
           const worker = import.meta.env.DEV
             ? new Worker(new URL("./lib/worker_n64.ts", import.meta.url), {
                 type: "module",
@@ -212,9 +177,9 @@
 
           worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
             if (typeof event.data === "string") {
-              alertText.set(event.data);
-              isVisible = true;
-              reset();
+              patcher.alertText = event.data;
+              patcher.isVisible = true;
+              patcher.reset();
             } else {
               savePatchedFile(event.data);
             }
@@ -225,10 +190,10 @@
             input: input,
             patch: patchFile,
           });
-        } else if (platform === "wii") {
+        } else if (patcher.platform === "wii") {
           const memPatch = await getS3File("gzi/mem_patch.gzi");
-          const hbPatch = await getS3File(`gzi/hb_${ver}.gzi`);
-          const hbBin = await getS3File(`hb/${ver}.bin`);
+          const hbPatch = await getS3File(`gzi/hb_${patcher.ver}.gzi`);
+          const hbBin = await getS3File(`hb/${patcher.ver}.bin`);
           const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
           concatPatch.set(memPatch, 0);
           concatPatch[memPatch.length - 1] = 10;
@@ -243,8 +208,8 @@
             wad: input,
             xdelta_patch: patchFile,
             gzi_patch: concatPatch,
-            channel_id: channelId,
-            title: title,
+            channel_id: patcher.channelId,
+            title: patcher.title,
             dol_patch: dolPatch,
           };
 
@@ -258,9 +223,9 @@
 
           worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
             if (typeof event.data === "string") {
-              alertText.set(event.data);
-              isVisible = true;
-              reset();
+              patcher.alertText = event.data;
+              patcher.isVisible = true;
+              patcher.reset();
             } else {
               savePatchedFile(event.data);
             }
@@ -268,14 +233,14 @@
           };
 
           worker.postMessage(settings);
-        } else if (platform === "wiiu") {
-          const config = await getS3File(`wiiu/${ver}.ini`);
+        } else if (patcher.platform === "wiiu") {
+          const config = await getS3File(`wiiu/${patcher.ver}.ini`);
           let frameLayout: Uint8Array;
-          if (enableWidescreen && enableDarkFilter) {
+          if (patcher.enableWidescreen && patcher.enableDarkFilter) {
             frameLayout = await getS3File(`wiiu/FrameLayout_dark_wide.arc`);
-          } else if (enableDarkFilter) {
+          } else if (patcher.enableDarkFilter) {
             frameLayout = await getS3File(`wiiu/FrameLayout_dark.arc`);
-          } else if (enableWidescreen) {
+          } else if (patcher.enableWidescreen) {
             frameLayout = await getS3File(`wiiu/FrameLayout_wide.arc`);
           } else {
             frameLayout = await getS3File(`wiiu/FrameLayout.arc`);
@@ -283,11 +248,11 @@
           const settings = {
             input_archive: input,
             xdelta_patch: patchFile,
-            enable_dark_filter: enableDarkFilter,
-            enable_widescreen: enableWidescreen,
-            name: `fp-${tag}-${ver}`,
+            enable_dark_filter: patcher.enableDarkFilter,
+            enable_widescreen: patcher.enableWidescreen,
+            name: `fp-${patcher.tag}-${patcher.ver}`,
             config: config,
-            return_zip: returnZip,
+            return_zip: patcher.returnZip,
             frame_layout: frameLayout,
           };
 
@@ -301,9 +266,9 @@
 
           worker.onmessage = (event: MessageEvent<Uint8Array | string>) => {
             if (typeof event.data === "string") {
-              alertText.set(event.data);
-              isVisible = true;
-              reset();
+              patcher.alertText = event.data;
+              patcher.isVisible = true;
+              patcher.reset();
             } else {
               savePatchedFile(event.data);
             }
@@ -326,13 +291,13 @@
     class="container flex max-w-md flex-col items-center justify-center rounded border border-sky-500 p-8 dark:text-white"
   >
     <h1 class="text-4xl font-bold">fp web patcher</h1>
-    <Label class="pb-8 {tag != null ? '' : 'invisible'}"
-      >current fp version: {tag}</Label
+    <Label class="pb-8 {patcher.tag != null ? '' : 'invisible'}"
+      >current fp version: {patcher.tag}</Label
     >
     <div class="w-5/6">
       <Label for="fileInput" class="pb-2"
-        >{romHashMessage}
-        <button id="b3" onclick={() => (clickOutsideModal = true)}>
+        >{patcher.romHashMessage}
+        <button id="b3" onclick={() => (patcher.clickOutsideModal = true)}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -353,7 +318,7 @@
 
     <Modal
       title="Input File Formats"
-      bind:open={clickOutsideModal}
+      bind:open={patcher.clickOutsideModal}
       autoclose
       outsideclose
     >
@@ -374,20 +339,18 @@
         <Input
           type="text"
           id="outfile"
-          bind:value={outFileName}
-          onchange={blockBuild}
+          bind:value={patcher.outFileName}
           required
         />
       </div>
-      {#if platform === "wii"}
+      {#if patcher.platform === "wii"}
         <div transition:slide>
           <div class="flex items-center pb-5 whitespace-nowrap">
             <p class="mr-3 text-left">Channel title:</p>
             <Input
               type="text"
               id="channel-title"
-              bind:value={title}
-              onchange={blockBuild}
+              bind:value={patcher.title}
               required
             />
           </div>
@@ -396,31 +359,33 @@
             <Input
               type="text"
               id="channel-id"
-              bind:value={channelId}
-              onchange={blockBuild}
+              bind:value={patcher.channelId}
               required
             />
           </div>
         </div>
       {/if}
-      {#if platform === "wiiu"}
+      {#if patcher.platform === "wiiu"}
         <div transition:slide class="space-y-4">
           <div class="flex gap-5">
             <Radio
               name="version"
               value="us"
-              bind:group={ver}
+              bind:group={patcher.ver}
               onchange={handleVersionChange}>US</Radio
             >
             <Radio
               name="version"
               value="jp"
-              bind:group={ver}
+              bind:group={patcher.ver}
               onchange={handleVersionChange}>JP</Radio
             >
           </div>
-          <Checkbox bind:checked={enableDarkFilter}>Dark filter</Checkbox>
-          <Checkbox bind:checked={enableWidescreen}>Widescreen</Checkbox>
+          <Checkbox bind:checked={patcher.enableDarkFilter}
+            >Dark filter</Checkbox
+          >
+          <Checkbox bind:checked={patcher.enableWidescreen}>Widescreen</Checkbox
+          >
         </div>
       {/if}
     </div>
@@ -431,24 +396,24 @@
         color="greenToBlue"
         size="xl"
         class="col-span-3"
-        disabled={disableButton}
+        disabled={patcher.disableButton}
         onclick={() => buildFp()}
       >
-        {$buttonText}
+        {patcher.buttonText}
       </GradientButton>
       <Spinner
-        class="mr-3 {showLoading ? '' : 'invisible'}"
+        class="mr-3 {patcher.showLoading ? '' : 'invisible'}"
         size="4"
         color="green"
       />
     </div>
-    {#key reloadAlert}
-      {#if isVisible}
+    {#key patcher.reloadAlert}
+      {#if patcher.isVisible}
         <Alert dismissable transition={slide} color="red" class="mt-6">
           {#snippet icon()}
             <CloseCircleSolid class="h-5 w-5" />
           {/snippet}
-          {$alertText}
+          {patcher.alertText}
         </Alert>
       {/if}
     {/key}
