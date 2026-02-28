@@ -29,7 +29,7 @@ importers:
         version: 9.39.3
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.7.1
-        version: 4.7.1(prettier@3.6.2)
+        version: 4.7.1(prettier@3.8.1)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.1.0
         version: 6.2.4(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.6.1))
@@ -68,13 +68,13 @@ importers:
         version: 16.5.0
       prettier:
         specifier: ^3.6.2
-        version: 3.6.2
+        version: 3.8.1
       prettier-plugin-svelte:
         specifier: ^3.4.0
-        version: 3.5.0(prettier@3.6.2)(svelte@5.53.6)
+        version: 3.5.0(prettier@3.8.1)(svelte@5.53.6)
       prettier-plugin-tailwindcss:
         specifier: ^0.6.14
-        version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.6.2))(@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2)(svelte@5.53.6))(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2)
+        version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.1))(@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1)(svelte@5.53.6))(prettier-plugin-organize-imports@4.3.0(prettier@3.8.1)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1)
       svelte:
         specifier: ^5.36.8
         version: 5.53.6
@@ -1448,8 +1448,8 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.6.2:
-    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -1866,13 +1866,13 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.6.2)':
+  '@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.1)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.0
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
-      prettier: 3.6.2
+      prettier: 3.8.1
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
@@ -2099,7 +2099,7 @@ snapshots:
       tailwindcss: 4.2.1
       vite: 7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.6.1)
 
-  '@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2)(svelte@5.53.6)':
+  '@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1)(svelte@5.53.6)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.0
@@ -2109,9 +2109,9 @@ snapshots:
       lodash-es: 4.17.23
       minimatch: 9.0.9
       parse-imports-exports: 0.2.4
-      prettier: 3.6.2
+      prettier: 3.8.1
     optionalDependencies:
-      prettier-plugin-svelte: 3.5.0(prettier@3.6.2)(svelte@5.53.6)
+      prettier-plugin-svelte: 3.5.0(prettier@3.8.1)(svelte@5.53.6)
       svelte: 5.53.6
     transitivePeerDependencies:
       - supports-color
@@ -2788,27 +2788,27 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3):
+  prettier-plugin-organize-imports@4.3.0(prettier@3.8.1)(typescript@5.8.3):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.8.1
       typescript: 5.8.3
     optional: true
 
-  prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6):
+  prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.8.1
       svelte: 5.53.6
 
-  prettier-plugin-tailwindcss@0.6.14(@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.6.2))(@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2)(svelte@5.53.6))(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2):
+  prettier-plugin-tailwindcss@0.6.14(@ianvs/prettier-plugin-sort-imports@4.7.1(prettier@3.8.1))(@trivago/prettier-plugin-sort-imports@6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1)(svelte@5.53.6))(prettier-plugin-organize-imports@4.3.0(prettier@3.8.1)(typescript@5.8.3))(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1):
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.8.1
     optionalDependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.7.1(prettier@3.6.2)
-      '@trivago/prettier-plugin-sort-imports': 6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.6.2)(svelte@5.53.6))(prettier@3.6.2)(svelte@5.53.6)
-      prettier-plugin-organize-imports: 4.3.0(prettier@3.6.2)(typescript@5.8.3)
-      prettier-plugin-svelte: 3.5.0(prettier@3.6.2)(svelte@5.53.6)
+      '@ianvs/prettier-plugin-sort-imports': 4.7.1(prettier@3.8.1)
+      '@trivago/prettier-plugin-sort-imports': 6.0.2(prettier-plugin-svelte@3.5.0(prettier@3.8.1)(svelte@5.53.6))(prettier@3.8.1)(svelte@5.53.6)
+      prettier-plugin-organize-imports: 4.3.0(prettier@3.8.1)(typescript@5.8.3)
+      prettier-plugin-svelte: 3.5.0(prettier@3.8.1)(svelte@5.53.6)
 
-  prettier@3.6.2: {}
+  prettier@3.8.1: {}
 
   punycode@2.3.1: {}
 
