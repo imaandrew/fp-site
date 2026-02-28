@@ -6,7 +6,7 @@
   import type { PatcherState } from "$lib/patcherState.svelte";
   import { getCrc } from "$lib/util";
 
-  const patcher: PatcherState = getContext("patcher");
+  const patcher = getContext<PatcherState>("patcher");
 
   async function assignFileHash(file: File) {
     try {
@@ -62,18 +62,16 @@
 
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
-    if (!target.files) {
+    const f = target.files?.[0];
+    if (!f) {
       return;
     }
-    const f = target.files[0];
-    if (f) {
-      patcher.inputFile = f;
-      if (f.size >= 70000000) {
-        patcher.showError("File too big");
-        return;
-      }
-      await assignFileHash(f);
+    patcher.inputFile = f;
+    if (f.size >= 70000000) {
+      patcher.showError("File too big");
+      return;
     }
+    await assignFileHash(f);
   }
 </script>
 

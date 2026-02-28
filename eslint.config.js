@@ -8,7 +8,8 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   { languageOptions: { globals: globals.browser } },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
   ...eslintPluginSvelte.configs["flat/recommended"],
   ...eslintPluginSvelte.configs["flat/prettier"],
   eslintConfigPrettier,

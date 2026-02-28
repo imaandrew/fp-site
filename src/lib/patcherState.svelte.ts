@@ -1,3 +1,5 @@
+export type Platform = "n64" | "wii" | "wiiu";
+
 export class PatcherState {
   // Latest FP release
   ver: string = $state("");
@@ -6,7 +8,7 @@ export class PatcherState {
   // ROM file vars
   inputFile: File | null = $state(null);
   romHashMessage = $state("Choose base file");
-  platform: string = $state("n64");
+  platform: Platform = $state("n64");
 
   // Wii options
   channelId: string = $state("");
@@ -44,8 +46,6 @@ export class PatcherState {
           return `${this.tag}-${this.ver}.tar`;
         }
     }
-
-    return "";
   });
 
   disableButton: boolean = $derived(

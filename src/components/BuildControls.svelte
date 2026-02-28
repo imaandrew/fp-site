@@ -6,7 +6,7 @@
 
   import type { PatcherState } from "$lib/patcherState.svelte";
 
-  const patcher: PatcherState = getContext("patcher");
+  const patcher = getContext<PatcherState>("patcher");
   let { buildFn }: { buildFn: () => void } = $props();
 </script>
 
@@ -18,7 +18,9 @@
     size="xl"
     class="col-span-3"
     disabled={patcher.disableButton}
-    onclick={() => buildFn()}
+    onclick={() => {
+      buildFn();
+    }}
   >
     {patcher.buttonText}
   </GradientButton>

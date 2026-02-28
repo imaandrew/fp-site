@@ -5,7 +5,7 @@
 
   import type { PatcherState } from "$lib/patcherState.svelte";
 
-  const patcher: PatcherState = getContext("patcher");
+  const patcher = getContext<PatcherState>("patcher");
 </script>
 
 <div class="platform-settings mb-6 grid gap-1">

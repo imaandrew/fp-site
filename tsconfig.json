@@ -1,6 +1,8 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -8,8 +10,6 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
     "paths": {
       "$lib/*": ["./src/lib/*"]
     }

@@ -1,6 +1,6 @@
 import __wbg_init, { wiiu_inject } from "fp-web-patcher";
 
-export type WiiUSettings = {
+export interface WiiUSettings {
   input_archive: Uint8Array;
   xdelta_patch: Uint8Array;
   enable_dark_filter: boolean;
@@ -9,16 +9,16 @@ export type WiiUSettings = {
   config: Uint8Array;
   return_zip: boolean;
   frame_layout: Uint8Array;
-};
+}
 
 self.onmessage = (e: MessageEvent<WiiUSettings>) => {
   __wbg_init()
     .then(() => {
       postMessage(wiiu_inject(e.data));
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       console.error(e);
-      postMessage(e);
+      postMessage(e instanceof Error ? e.message : String(e));
     });
 };
 

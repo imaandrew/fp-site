@@ -43,13 +43,14 @@
     patcher.showLoading = true;
     patcher.disableButton = true;
     patcher.isAlertVisible = false;
-    patcher.reloadAlert ^= 1;
+    patcher.reloadAlert++;
+    if (!patcher.inputFile) return;
 
     try {
       const patchFile = await getS3File(
         `fp/${patcher.tag}/${patcher.ver}.xdelta`,
       );
-      const input = await readFileAsUint8Array(patcher.inputFile!);
+      const input = await readFileAsUint8Array(patcher.inputFile);
       swapBytes(input);
 
       let platformPatcher: PlatformPatcher;
@@ -73,14 +74,12 @@
             patcher.returnZip,
           );
           break;
-        default:
-          throw new Error(`Unknown platform: ${patcher.platform}`);
       }
 
       const worker = await platformPatcher.patch(input, patchFile);
-      setupWorkerHandler(worker, savePatchedFile, (msg) =>
-        patcher.showError(msg),
-      );
+      setupWorkerHandler(worker, savePatchedFile, (msg) => {
+        patcher.showError(msg);
+      });
     } catch (error) {
       patcher.showError(error instanceof Error ? error.message : String(error));
     }
@@ -94,9 +93,7 @@
     class="container flex max-w-md flex-col items-center justify-center rounded border border-sky-500 p-8 dark:text-white"
   >
     <h1 class="text-4xl font-bold">fp web patcher</h1>
-    <Label class="pb-8 {patcher.tag != null ? '' : 'invisible'}"
-      >current fp version: {patcher.tag}</Label
-    >
+    <Label class="pb-8">current fp version: {patcher.tag}</Label>
 
     <FileUploader />
 

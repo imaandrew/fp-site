@@ -1,9 +1,9 @@
 import __wbg_init, { n64_decode } from "fp-web-patcher";
 
-export type N64Settings = {
+export interface N64Settings {
   input: Uint8Array;
   patch: Uint8Array;
-};
+}
 
 self.onmessage = (e: MessageEvent<N64Settings>) => {
   const rom = e.data.input;
@@ -12,9 +12,9 @@ self.onmessage = (e: MessageEvent<N64Settings>) => {
     .then(() => {
       postMessage(n64_decode(rom, patch));
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       console.error(e);
-      postMessage(e);
+      postMessage(e instanceof Error ? e.message : String(e));
     });
 };
 

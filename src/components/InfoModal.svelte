@@ -4,7 +4,7 @@
 
   import type { PatcherState } from "$lib/patcherState.svelte";
 
-  const patcher: PatcherState = getContext("patcher");
+  const patcher = getContext<PatcherState>("patcher");
 </script>
 
 <Modal

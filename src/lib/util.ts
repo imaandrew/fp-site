@@ -1,6 +1,9 @@
 import { buf } from "crc-32";
 
-import { ROM_HEADER_BYTESWAPPED, ROM_HEADER_LITTLEENDIAN } from "./constants";
+import {
+  ROM_HEADER_BYTESWAPPED,
+  ROM_HEADER_LITTLEENDIAN,
+} from "$lib/constants";
 
 export async function getS3File(path: string): Promise<Uint8Array> {
   const response = await fetch(
@@ -14,28 +17,26 @@ export async function getS3File(path: string): Promise<Uint8Array> {
 }
 
 interface JSONResponse {
-  node_id: string;
-  object: {
+  name: string;
+  zipball_url: string;
+  tarball_url: string;
+  commit: {
     sha: string;
-    type: string;
     url: string;
   };
-  ref: string;
-  url: string;
+  node_id: string;
 }
 
 export async function getLatestTag(): Promise<string> {
-  const response = await fetch(
-    "https://api.github.com/repos/jcog/fp/git/refs/tags",
-  );
+  const response = await fetch("https://api.github.com/repos/jcog/fp/tags");
   if (!response.ok) {
     throw new Error(
       `Error retrieving tag from GitHub API: ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as Array<JSONResponse>;
-  const tag = data[data.length - 1].ref.split("/").pop();
+  const data = (await response.json()) as JSONResponse[];
+  const tag = data[0]?.name;
   if (tag == null) {
     throw new Error("Could not parse GitHub API response");
   }
@@ -47,22 +48,8 @@ export async function getCrc(file: File): Promise<number> {
   return buf(data) >>> 0;
 }
 
-export function readFileAsUint8Array(file: File): Promise<Uint8Array> {
-  return new Promise<Uint8Array>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const arrayBuffer = event.target?.result as ArrayBuffer;
-      const uint8Array = new Uint8Array(arrayBuffer);
-      resolve(uint8Array);
-    };
-
-    reader.onerror = (event) => {
-      reject(new Error(event.target?.error?.message));
-    };
-
-    reader.readAsArrayBuffer(file);
-  });
+export async function readFileAsUint8Array(file: File): Promise<Uint8Array> {
+  return new Uint8Array(await file.arrayBuffer());
 }
 
 export function swapBytes(input: Uint8Array) {
