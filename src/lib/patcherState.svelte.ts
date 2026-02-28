@@ -1,23 +1,34 @@
 export class PatcherState {
-  inputFile: File | null = $state(null);
+  // Latest FP release
   ver: string = $state("");
   tag: string = $state("");
-  channelId: string = $state("");
-  title: string = $state("");
+
+  // ROM file vars
+  inputFile: File | null = $state(null);
   romHashMessage = $state("Choose base file");
   platform: string = $state("n64");
+
+  // Wii options
+  channelId: string = $state("");
+  title: string = $state("");
+
+  // WiiU options
   returnZip = $state(false);
   enableDarkFilter = $state(false);
   enableWidescreen = $state(false);
+
+  // Visual options
   clickOutsideModal = $state(false);
   showLoading = $state(false);
-  isVisible = $state(false);
   buttonText = $state("Build");
+
+  // Alert options
+  isAlertVisible = $state(false);
   alertText = $state("");
   reloadAlert = $state(0);
 
   outFileName: string = $derived.by(() => {
-    if (this.tag === "" || this.ver === "" || this.ver === "unk") {
+    if (this.tag === "" || this.ver === "") {
       return "";
     }
 
@@ -38,9 +49,8 @@ export class PatcherState {
   });
 
   disableButton: boolean = $derived(
-    this.ver === "unk" ||
-      this.ver === "" ||
-      this.inputFile == null ||
+    this.ver === "" ||
+      this.inputFile === null ||
       this.tag === "" ||
       this.outFileName === "" ||
       (this.platform === "wii" && (!this.title || !this.channelId)),
@@ -49,5 +59,11 @@ export class PatcherState {
   reset() {
     this.buttonText = "Build";
     this.showLoading = false;
+  }
+
+  showError(message: string) {
+    this.alertText = message;
+    this.isAlertVisible = true;
+    this.reset();
   }
 }

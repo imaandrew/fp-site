@@ -1,4 +1,5 @@
 import { buf } from "crc-32";
+import { ROM_HEADER_BYTESWAPPED, ROM_HEADER_LITTLEENDIAN } from "./constants";
 
 export async function getS3File(path: string): Promise<Uint8Array> {
   const response = await fetch(
@@ -27,13 +28,15 @@ export async function getLatestTag(): Promise<string> {
     "https://api.github.com/repos/jcog/fp/git/refs/tags",
   );
   if (!response.ok) {
-    throw new Error(`Error retrieving tag: ${response.statusText}`);
+    throw new Error(
+      `Error retrieving tag from GitHub API: ${response.statusText}`,
+    );
   }
 
   const data = (await response.json()) as Array<JSONResponse>;
   const tag = data[data.length - 1].ref.split("/").pop();
   if (tag == null) {
-    throw new Error("Could not parse response");
+    throw new Error("Could not parse GitHub API response");
   }
   return tag;
 }
@@ -59,4 +62,34 @@ export function readFileAsUint8Array(file: File): Promise<Uint8Array> {
 
     reader.readAsArrayBuffer(file);
   });
+}
+
+export function swapBytes(input: Uint8Array) {
+  const dataView = new DataView(input.buffer);
+  const head = dataView.getUint32(0);
+  if (head === ROM_HEADER_BYTESWAPPED) {
+    for (let i = 0; i < dataView.byteLength; i += 2) {
+      dataView.setUint16(i, dataView.getUint16(i), true);
+    }
+  } else if (head === ROM_HEADER_LITTLEENDIAN) {
+    for (let i = 0; i < dataView.byteLength; i += 4) {
+      dataView.setUint32(i, dataView.getUint32(i), true);
+    }
+  }
+}
+
+// https://stackoverflow.com/a/62176999
+export function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
+  const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

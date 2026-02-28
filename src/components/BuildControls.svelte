@@ -7,7 +7,7 @@
   import { getContext } from "svelte";
 
   const patcher: PatcherState = getContext("patcher");
-  let { buildFn } = $props();
+  let { buildFn }: { buildFn: () => void } = $props();
 </script>
 
 <div class="grid auto-cols-max grid-cols-5 items-center gap-4">
@@ -29,7 +29,7 @@
   />
 </div>
 {#key patcher.reloadAlert}
-  {#if patcher.isVisible}
+  {#if patcher.isAlertVisible}
     <Alert dismissable transition={slide} color="red" class="mt-6">
       {#snippet icon()}
         <CloseCircleSolid class="h-5 w-5" />

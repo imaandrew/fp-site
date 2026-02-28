@@ -40,22 +40,22 @@
           patcher.title = "fp-JP";
           break;
         default:
-          if (file.name.split(".").pop() === "zip") {
+          if (file.name.toLowerCase().endsWith(".zip")) {
             patcher.romHashMessage = "Wii U Archive";
             patcher.platform = "wiiu";
             patcher.returnZip = true;
-          } else if (file.name.split(".").pop() === "tar") {
+          } else if (file.name.toLowerCase().endsWith(".tar")) {
             patcher.romHashMessage = "Wii U Archive";
             patcher.platform = "wiiu";
             patcher.returnZip = false;
           } else {
-            patcher.ver = "unk";
+            patcher.ver = "";
             patcher.romHashMessage = "Unknown base file";
           }
           break;
       }
     } catch (error) {
-      console.error(error);
+      patcher.showError(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -66,12 +66,12 @@
     }
     const f = target.files[0];
     if (f) {
-      switch (target.id) {
-        case "fileInput":
-          patcher.inputFile = f;
-          await assignFileHash(f);
-          break;
+      patcher.inputFile = f;
+      if (f.size >= 70000000) {
+        patcher.showError("File too big");
+        return;
       }
+      await assignFileHash(f);
     }
   }
 </script>
@@ -79,7 +79,11 @@
 <div class="w-5/6">
   <Label for="fileInput" class="pb-2"
     >{patcher.romHashMessage}
-    <button id="b3" onclick={() => (patcher.clickOutsideModal = true)}>
+    <button
+      id="b3"
+      onclick={() => (patcher.clickOutsideModal = true)}
+      disabled={patcher.disableButton}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
