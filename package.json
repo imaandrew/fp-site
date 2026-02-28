@@ -11,7 +11,6 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.848.0",
     "@eslint/js": "^9.31.0",
     "@sveltejs/vite-plugin-svelte": "^6.1.0",
     "@tailwindcss/vite": "^4.1.11",
@@ -20,7 +19,6 @@
     "@types/eslint-config-prettier": "^6.11.3",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
-    "autoprefixer": "^10.4.21",
     "crc-32": "^1.2.2",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
