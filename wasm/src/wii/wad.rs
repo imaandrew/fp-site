@@ -938,13 +938,13 @@ fn encode_u64(vec: &mut Vec<u8>, val: u64) {
 }
 
 fn align(vec: &mut Vec<u8>, amt: usize) {
-    if vec.len() % amt != 0 {
+    if !vec.len().is_multiple_of(amt) {
         vec.resize(amt * ((vec.len() / amt) + 1), 0);
     }
 }
 
 fn align_num(num: usize, amt: usize) -> usize {
-    if num % amt != 0 {
+    if !num.is_multiple_of(amt) {
         amt * ((num / amt) + 1)
     } else {
         num

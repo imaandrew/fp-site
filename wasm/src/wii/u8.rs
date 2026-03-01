@@ -312,7 +312,7 @@ impl U8Packer {
 }
 
 fn align(num: u32, amt: usize) -> usize {
-    if num as usize % amt != 0 {
+    if !(num as usize).is_multiple_of(amt) {
         amt * ((num as usize / amt) + 1)
     } else {
         num as usize
