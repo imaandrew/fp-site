@@ -1,4 +1,4 @@
-name: Frontend
+name: Lint and Formatting checks
 
 on:
   push:
