@@ -4,10 +4,9 @@ import App from "./App.svelte";
 
 import "./app.css";
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-const app = mount(App, {
-  target: document.getElementById("app")!,
-});
-/* eslint-enable @typescript-eslint/no-non-null-assertion */
+const target = document.getElementById("app");
+if (!target) throw new Error("Could not find #app element");
+
+const app = mount(App, { target });
 
 export default app;

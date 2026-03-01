@@ -37,9 +37,6 @@ export async function getLatestTag(): Promise<string> {
 
   const data = (await response.json()) as JSONResponse[];
   const tag = data[0]?.name;
-  if (tag == null) {
-    throw new Error("Could not parse GitHub API response");
-  }
   return tag;
 }
 
