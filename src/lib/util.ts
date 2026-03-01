@@ -65,7 +65,9 @@ export function swapBytes(input: Uint8Array) {
 
 // https://stackoverflow.com/a/62176999
 export function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
-  const blob = new Blob([uint8Array as BlobPart], { type: "application/octet-stream" });
+  const blob = new Blob([uint8Array as BlobPart], {
+    type: "application/octet-stream",
+  });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
