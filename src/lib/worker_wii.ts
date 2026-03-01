@@ -1,4 +1,4 @@
-import __wbg_init, { wii_inject } from "fp-web-patcher";
+import __wbg_init, { wii_inject } from "../../wasm/pkg";
 
 export interface DolPatch {
   dol_num: number;
