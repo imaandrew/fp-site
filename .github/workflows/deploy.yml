@@ -54,7 +54,6 @@ jobs:
               environment,
               auto_merge: false,
               required_contexts: [],
-              transient_environment: environment === 'Preview',
               production_environment: environment === 'Production',
             });
             core.setOutput('deployment_id', deployment.data.id);
