@@ -1,26 +1,55 @@
-name: Lint
+name: Frontend
 
 on:
   push:
-    branches:
-      - main
-      - renovate/**
   pull_request:
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  lint:
-    name: Lint
+  frontend:
+    name: Frontend lint & format
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
         with:
-          cache: "pnpm"
-      - name: Install Dependencies
-        run: pnpm i
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
       - name: Lint
         run: pnpm lint
+
+      - name: Check
+        run: pnpm check
+
+  rust:
+    name: Rust checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wasm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
