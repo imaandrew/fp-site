@@ -1,21 +1,35 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:best-practices",
+    ":dependencyDashboard",
+    "group:allNonMajor",
+    "schedule:earlyMondays"
+  ],
+  "labels": ["dependencies"],
+  "timezone": "America/Toronto",
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "major": {
+    "automerge": false
+  },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "matchCurrentVersion": "!/^0/",
-      "automerge": true
-    },
-    {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
+      "description": "Group all GitHub Actions updates separately from standard dependencies",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "groupSlug": "github-actions"
     }
   ],
-  "platformAutomerge": true,
-  "automergeType": "branch",
-  "major": {
-    "dependencyDashboardApproval": true
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "automerge": false,
+    "labels": ["security", "dependencies"]
   },
-  "timezone": "America/Toronto"
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 5am on monday"]
+  }
 }
