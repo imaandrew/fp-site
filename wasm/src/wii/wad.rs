@@ -94,13 +94,13 @@ impl Wad {
         let mut file: Option<u32> = None;
 
         for line in lines {
-            if line.starts_with(&[b'#']) || line.is_empty() {
+            if line.starts_with(b"#") || line.is_empty() {
                 continue;
             }
 
             let parts: Vec<&[u8]> = line.split(|&byte| byte == b' ').collect();
             let cmd = u16::from_str_radix(
-                std::str::from_utf8(parts.get(0).ok_or(WadError::InvalidPatchFile)?)
+                std::str::from_utf8(parts.first().ok_or(WadError::InvalidPatchFile)?)
                     .map_err(|_| WadError::InvalidPatchFile)?,
                 16,
             )
@@ -134,7 +134,7 @@ impl Wad {
                     let len = self.contents.len();
                     let file = file.ok_or(WadError::InvalidPatchFile)?;
                     let file = match file {
-                        100 | 101 | 102 => continue,
+                        100..=102 => continue,
                         _ => self
                             .contents
                             .get_mut(file as usize)

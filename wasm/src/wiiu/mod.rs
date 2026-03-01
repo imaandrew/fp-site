@@ -242,7 +242,7 @@ impl Iterator for TarReader<'_> {
 }
 
 type ArchiveIter<'a> = Box<dyn Iterator<Item = Result<(String, Vec<u8>), WiiUError>> + 'a>;
-fn get_iter(input: Cursor<&Vec<u8>>, is_zip: bool) -> Result<ArchiveIter, WiiUError> {
+fn get_iter(input: Cursor<&'_ Vec<u8>>, is_zip: bool) -> Result<ArchiveIter<'_>, WiiUError> {
     if is_zip {
         Ok(Box::new(ZipReader::build(input)?))
     } else {
