@@ -1,6 +1,6 @@
-# Ignore artifacts:
-build
-coverage
-
-pnpm-lock.yaml
-wasm
+node_modules
+dist
+dist-ssr
+wasm/target
+wasm/pkg
+package-lock.json

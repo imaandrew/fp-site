@@ -1,51 +1,42 @@
-import eslint from "@eslint/js";
+import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
-import eslintPluginSvelte from "eslint-plugin-svelte";
+import svelte from "eslint-plugin-svelte";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
-import svelte from "svelte-eslint-parser";
-import tseslint from "typescript-eslint";
+import ts from "typescript-eslint";
 
-export default tseslint.config(
-  { languageOptions: { globals: globals.browser } },
-  eslint.configs.recommended,
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  ...eslintPluginSvelte.configs["flat/recommended"],
-  ...eslintPluginSvelte.configs["flat/prettier"],
+import svelteConfig from "./svelte.config.js";
+
+export default defineConfig(
+  js.configs.recommended,
+  ...ts.configs.strictTypeChecked,
+  ...ts.configs.stylisticTypeChecked,
+  ...svelte.configs.recommended,
+  ...svelte.configs.prettier,
   eslintConfigPrettier,
   {
     languageOptions: {
       parserOptions: {
-        project: true,
-        tsconfigRootDir: import.meta.dirname,
-        extraFileExtensions: [".svelte"],
-        sourceType: "module",
+        projectService: true,
       },
-    },
-  },
-  {
-    files: ["tailwind.config.js", "eslint.config.js"],
-    languageOptions: {
-      globals: globals.node,
-      parserOptions: {
-        sourceType: "script",
+      globals: {
+        ...globals.browser,
+        ...globals.node,
       },
     },
   },
   {
     files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
     languageOptions: {
-      parser: svelte,
       parserOptions: {
-        parser: tseslint.parser,
+        projectService: true,
+        extraFileExtensions: [".svelte"],
+        parser: ts.parser,
+        svelteConfig,
       },
     },
   },
   {
-    ignores: ["dist/"],
-  },
-  {
-    files: ["**/*.js"],
-    extends: [tseslint.configs.disableTypeChecked],
+    ignores: ["node_modules/", "dist/", "wasm/target/", "wasm/pkg/"],
   },
 );
