@@ -1,26 +1,80 @@
-name: Lint
+name: Lint and Formatting checks
 
 on:
   push:
-    branches:
-      - main
-      - renovate/**
+    branches: [main]
   pull_request:
 
 jobs:
-  lint:
-    name: Lint
+  build-wasm:
+    name: Build wasm
     runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build wasm
+        run: wasm-pack build wasm --target web --out-dir pkg
+
+      - uses: actions/cache/save@v4
         with:
-          cache: "pnpm"
-      - name: Install Dependencies
-        run: pnpm i
+          path: wasm/pkg
+          key: wasm-pkg-${{ hashFiles('wasm/src/**', 'wasm/Cargo.toml', 'wasm/Cargo.lock') }}
+
+  rust:
+    name: Rust checks
+    runs-on: ubuntu-latest
+    needs: build-wasm
+    env:
+      CARGO_TERM_COLOR: always
+    defaults:
+      run:
+        working-directory: wasm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+
+  frontend:
+    name: Frontend lint & format
+    runs-on: ubuntu-latest
+    needs: build-wasm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: wasm/pkg
+          key: wasm-pkg-${{ hashFiles('wasm/src/**', 'wasm/Cargo.toml', 'wasm/Cargo.lock') }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
       - name: Lint
         run: pnpm lint
+
+      - name: Check
+        run: pnpm check

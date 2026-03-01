@@ -37,9 +37,6 @@ export async function getLatestTag(): Promise<string> {
 
   const data = (await response.json()) as JSONResponse[];
   const tag = data[0]?.name;
-  if (tag == null) {
-    throw new Error("Could not parse GitHub API response");
-  }
   return tag;
 }
 
@@ -68,7 +65,9 @@ export function swapBytes(input: Uint8Array) {
 
 // https://stackoverflow.com/a/62176999
 export function saveUint8ArrayToFile(uint8Array: Uint8Array, fileName: string) {
-  const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+  const blob = new Blob([uint8Array as BlobPart], {
+    type: "application/octet-stream",
+  });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
