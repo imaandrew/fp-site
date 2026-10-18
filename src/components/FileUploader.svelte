@@ -81,7 +81,6 @@
     <button
       id="b3"
       onclick={() => (patcher.clickOutsideModal = true)}
-      disabled={patcher.disableButton}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
