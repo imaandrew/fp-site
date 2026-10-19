@@ -202,8 +202,8 @@ impl Wad {
             }
 
             let names = &mut self.contents[0][imet_pos + 28..];
-            let name_chunks = names.chunks_exact_mut(84);
-            for chunk in name_chunks.take(8) {
+            let (name_chunks, _) = names.as_chunks_mut::<84>();
+            for chunk in name_chunks.iter_mut().take(8) {
                 chunk[0..40].copy_from_slice(&name);
             }
 
