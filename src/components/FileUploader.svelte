@@ -78,10 +78,7 @@
 <div class="w-5/6">
   <Label for="fileInput" class="pb-2"
     >{patcher.romHashMessage}
-    <button
-      id="b3"
-      onclick={() => (patcher.clickOutsideModal = true)}
-    >
+    <button id="b3" onclick={() => (patcher.clickOutsideModal = true)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
