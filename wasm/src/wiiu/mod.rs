@@ -7,11 +7,8 @@ use std::path::{Path, PathBuf};
 use std::str;
 use tar::{Archive, Builder, Header};
 use thiserror::Error;
-use zip::{
-    CompressionMethod, ZipArchive,
-    result::ZipError,
-    write::{FileOptions, ZipWriter},
-};
+use zip::write::SimpleFileOptions;
+use zip::{CompressionMethod, ZipArchive, result::ZipError, write::ZipWriter};
 
 #[derive(Error, Debug)]
 pub enum WiiUError {
@@ -125,19 +122,19 @@ fn edit_zip<R: Read + io::Seek, W: Write + io::Seek>(
 ) -> Result<W, WiiUError> {
     let mut input = ZipArchive::new(data)?;
     let mut output = ZipWriter::new(out);
-    let options = FileOptions::default().compression_method(CompressionMethod::Stored);
+    let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
 
     for i in 0..input.len() {
         let mut f = input.by_index(i)?;
-        if !replace.contains(&f.name()) {
+        if !replace.contains(&*f.name()?) {
             output.raw_copy_file(f)?;
             continue;
         }
 
         let mut contents = Vec::with_capacity(f.size() as usize);
         f.read_to_end(&mut contents)?;
-        output.start_file(f.name(), options)?;
-        output.write_all(&edit(f.name(), contents)?)?;
+        output.start_file(&f.name()?, options)?;
+        output.write_all(&edit(&f.name()?, contents)?)?;
     }
 
     Ok(output.finish()?)

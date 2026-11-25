@@ -1,6 +1,6 @@
 use std::num::ParseIntError;
 
-use aes::cipher::{BlockDecryptMut, BlockEncryptMut, KeyIvInit, block_padding::NoPadding};
+use aes::cipher::{BlockModeDecrypt, BlockModeEncrypt, KeyIvInit, block_padding::NoPadding};
 use sha1::{Digest, Sha1};
 use thiserror::Error;
 
@@ -81,12 +81,12 @@ fn align_num(num: usize, align: usize) -> usize {
 
 fn aes_cbc_dec(key: [u8; 16], iv: [u8; 16], data: &[u8]) -> Option<Vec<u8>> {
     Aes128CbcDec::new(&key.into(), &iv.into())
-        .decrypt_padded_vec_mut::<NoPadding>(data)
+        .decrypt_padded_vec::<NoPadding>(data)
         .ok()
 }
 
 fn aes_cbc_enc(key: [u8; 16], iv: [u8; 16], data: &[u8]) -> Vec<u8> {
-    Aes128CbcEnc::new(&key.into(), &iv.into()).encrypt_padded_vec_mut::<NoPadding>(data)
+    Aes128CbcEnc::new(&key.into(), &iv.into()).encrypt_padded_vec::<NoPadding>(data)
 }
 
 fn sha1(data: &[u8]) -> [u8; 20] {
@@ -225,12 +225,11 @@ impl Wad {
 
     fn decrypt_title_key(ticket: &[u8]) -> Result<[u8; 16], WadError> {
         let mut title_key = ticket[tik::TITLE_KEY..tik::TITLE_KEY + tik::TITLE_KEY_SIZE].to_vec();
-        let mut iv = vec![0; 16];
+        let mut iv = [0; tik::TITLE_KEY_SIZE];
         iv[..tik::TITLE_ID_SIZE]
             .copy_from_slice(&ticket[tik::TITLE_ID..tik::TITLE_ID + tik::TITLE_ID_SIZE]);
-        Aes128CbcDec::new(&COMMON_KEY.into(), iv.as_slice().into())
-            .decrypt_padded_mut::<NoPadding>(&mut title_key)
-            .map_err(|_| WadError::DecryptionError("title key".to_string()))?;
+        title_key = aes_cbc_dec(COMMON_KEY, iv, &title_key)
+            .ok_or(WadError::DecryptionError("title_key".to_string()))?;
         Ok(title_key.try_into().expect("should have 16 elements"))
     }
 
