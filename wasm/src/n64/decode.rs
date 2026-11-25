@@ -1,7 +1,8 @@
 use super::{
+    VCDiffDecoderError,
     cache::AddrCache,
     insts::{CodeTable, Instruction, Type},
-    read_byte, read_bytes, read_int, VCDiffDecoderError,
+    read_byte, read_bytes, read_int,
 };
 
 pub struct VCDiffDecoder<'a> {

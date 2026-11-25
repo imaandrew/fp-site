@@ -23,9 +23,12 @@ pub enum PatchError {
     U8(#[from] U8Error),
     #[error("wii u: {0}")]
     WiiU(#[from] WiiUError),
+    #[error(transparent)]
+    Slice(#[from] std::array::TryFromSliceError),
 }
 
 pub mod n64;
+mod reader;
 pub mod wii;
 pub mod wiiu;
 
@@ -126,15 +129,15 @@ fn patch_n64(s: &N64PatcherSettings) -> Result<Vec<u8>, PatchError> {
 
 fn patch_wii(s: &WiiPatcherSettings) -> Result<Vec<u8>, PatchError> {
     let mut wad = Wad::decode(&s.input)?;
-    let mut arc = U8Archive::new(wad.get_content(5).unwrap())?;
+    let mut arc = U8Archive::new(wad.get_content(5)?)?;
     let mut n = arc.open("./romc")?;
     let rom = Romc::decode(arc.read(&n)?);
     let patched_rom = n64_decode(&rom, &s.rom_patch)?;
     arc.replace_file(&mut n, &Romc::encode(&patched_rom))?;
-    wad.set_title_id(&s.channel_id.as_bytes()[..4])?;
+    wad.set_title_id(s.channel_id.as_bytes().try_into()?)?;
     wad.set_channel_title(&s.title)?;
     wad.set_region(3);
-    wad.apply_gzi(&String::from_utf8(s.gzi_patch.clone()).unwrap())?;
+    wad.apply_gzi(&s.gzi_patch)?;
     wad.apply_dol_patch(&s.dol_patch)?;
     Ok(wad.encode())
 }

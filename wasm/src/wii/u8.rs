@@ -198,7 +198,10 @@ impl<'a> U8Archive<'a> {
         if n.is_dir {
             return Err(U8Error::InvalidKind);
         }
-        if n.data_offset.checked_add(n.size).is_none_or(|end| end > self.buf.len()) {
+        if n.data_offset
+            .checked_add(n.size)
+            .is_none_or(|end| end > self.buf.len())
+        {
             return Err(U8Error::InvalidNode);
         }
         let new_size = u32::try_from(data.len()).map_err(|_| U8Error::InvalidNode)?;
