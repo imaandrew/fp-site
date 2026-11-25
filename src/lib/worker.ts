@@ -1,7 +1,4 @@
-import __wbg_init, {
-  patch,
-  type PatcherSettings,
-} from "$wasm/fp_web_patcher";
+import __wbg_init, { patch, type PatcherSettings } from "$wasm/fp_web_patcher";
 
 self.onmessage = (e: MessageEvent<PatcherSettings>) => {
   __wbg_init()

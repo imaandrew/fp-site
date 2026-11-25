@@ -19,14 +19,28 @@ export default defineConfig(
       parserOptions: {
         projectService: true,
       },
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
     },
   },
   {
-    files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
+    files: ["src/**/*.{ts,svelte}"],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
+  {
+    files: ["*.config.{js.ts}"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
+    files: ["src/**/worker.ts", "src/**/*.worker.ts"],
+    languageOptions: {
+      globals: globals.worker,
+    },
+  },
+  {
+    files: ["**/*.svelte", "**/*.svelte.ts"],
     languageOptions: {
       parserOptions: {
         projectService: true,

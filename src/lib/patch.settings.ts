@@ -1,7 +1,7 @@
+import type { PatcherSettings } from "$wasm/fp_web_patcher";
+
 import type { PatcherState, Platform } from "$lib/patcherState.svelte";
 import { getS3File, swapBytes } from "$lib/util";
-
-import type { PatcherSettings } from "$wasm/fp_web_patcher";
 
 export interface PlatformPatcher {
   patch(input: Uint8Array, patchFile: Uint8Array): Promise<Worker>;
