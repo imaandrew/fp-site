@@ -1,5 +1,4 @@
-use crate::n64_decode;
-use crate::WiiUInjectSettings;
+use crate::{WiiUPatcherSettings, n64_decode};
 use crc::{Crc, CRC_16_ARC};
 use ouroboros::self_referencing;
 use std::io::{Cursor, Read, Seek, Write};
@@ -33,9 +32,9 @@ pub enum WiiUError {
     InvalidStr(#[from] std::str::Utf8Error),
 }
 
-pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
-    let c = Cursor::new(&s.input_archive);
-    let mut file_reader = get_iter(c, s.return_zip)?;
+pub fn patch(s: &mut WiiUPatcherSettings) -> Result<Vec<u8>, WiiUError> {
+    let c = Cursor::new(&s.input);
+    let mut file_reader = get_iter(c, true)?;
 
     let mut cur_file;
     let start_idx = loop {
@@ -59,7 +58,7 @@ pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
         }
     };
 
-    let mut file_writer = FileWriter::new(Cursor::new(vec![]), s.return_zip);
+    let mut file_writer = FileWriter::new(Cursor::new(vec![]), true);
 
     let mut ver = None;
     let mut app_cfg = None;
@@ -77,7 +76,7 @@ pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
         match &path[start_idx..] {
             "content/rom/UNMQE0.785" => {
                 ver = Some(Ver::Us);
-                let rom = patch_rom(data, &s.xdelta_patch)?;
+                let rom = n64_decode(data, &s.rom_patch).unwrap();
                 file_writer.write_file("content/rom/UNMQE0.z64", &rom)?;
                 rom_digest.update(&rom);
                 file_writer.write_file("content/config/UNMQE0.z64.ini", &s.config)?;
@@ -85,7 +84,7 @@ pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
             }
             "content/rom/Unmqj0.716" => {
                 ver = Some(Ver::Jp);
-                let rom = patch_rom(data, &s.xdelta_patch)?;
+                let rom = n64_decode(data, &s.rom_patch).unwrap();
                 file_writer.write_file("content/rom/UNMQJ0.z64", &rom)?;
                 rom_digest.update(&rom);
                 file_writer.write_file("content/config/UNMQJ0.z64.ini", &s.config)?;
@@ -148,10 +147,6 @@ pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
             Ok(t.into_inner()?.into_inner())
         }
     }
-}
-
-fn patch_rom(file: &[u8], patch: &[u8]) -> Result<Vec<u8>, WiiUError> {
-    n64_decode(file, patch).map_err(WiiUError::PatchError)
 }
 
 struct ZipReader<'a> {

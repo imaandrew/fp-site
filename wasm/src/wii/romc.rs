@@ -18,7 +18,7 @@ impl Default for Romc {
 }
 
 impl Romc {
-    pub const fn new() -> Self {
+    const fn new() -> Self {
         Self {
             buf: [0; N + F - 1],
             mtch: (0, 0),
@@ -130,7 +130,7 @@ impl Romc {
         self.parent[p] = N;
     }
 
-    pub fn encode(&mut self, input: &[u8]) -> Vec<u8> {
+    pub fn encode(input: &[u8]) -> Vec<u8> {
         if input.is_empty() {
             return vec![];
         }
@@ -145,40 +145,42 @@ impl Romc {
 
         let mut out = vec![size as u8, 0, 0, 1];
 
-        self.init();
+        let mut romc = Romc::default();
+
+        romc.init();
 
         for i in s..r {
-            self.buf[i] = 0xff;
+            romc.buf[i] = 0xff;
         }
 
         let mut len: isize = 0;
 
         for (ind, x) in i.by_ref().take(F).enumerate() {
-            self.buf[r + ind] = *x;
+            romc.buf[r + ind] = *x;
             len += 1;
         }
 
         for i in 1..=F {
-            self.insert_node(r - i);
+            romc.insert_node(r - i);
         }
 
-        self.insert_node(r);
+        romc.insert_node(r);
 
         loop {
-            if self.mtch.1 > len {
-                self.mtch.1 = len;
+            if romc.mtch.1 > len {
+                romc.mtch.1 = len;
             }
 
-            if self.mtch.1 <= THRESHOLD as isize {
-                self.mtch.1 = 1;
-                code_buf[index] = self.buf[r];
+            if romc.mtch.1 <= THRESHOLD as isize {
+                romc.mtch.1 = 1;
+                code_buf[index] = romc.buf[r];
                 index += 1;
             } else {
                 code_buf[0] |= mask;
-                let uhhh = (((r as isize - self.mtch.0 as isize - 1) >> 8) & 0x0f) as u8
-                    | ((self.mtch.1 - (THRESHOLD as isize + 1)) << 4) as u8;
+                let uhhh = (((r as isize - romc.mtch.0 as isize - 1) >> 8) & 0x0f) as u8
+                    | ((romc.mtch.1 - (THRESHOLD as isize + 1)) << 4) as u8;
                 code_buf[index] = uhhh;
-                let uhhh2 = ((r as isize - self.mtch.0 as isize - 1) & 0xff) as u8;
+                let uhhh2 = ((r as isize - romc.mtch.0 as isize - 1) & 0xff) as u8;
                 code_buf[index + 1] = uhhh2;
                 index += 2;
             }
@@ -193,32 +195,32 @@ impl Romc {
             }
 
             let mut ind = 0;
-            let last_match_len = self.mtch.1;
+            let last_match_len = romc.mtch.1;
             for _ in 0..last_match_len {
                 if let Some(x) = i.next() {
                     ind += 1;
-                    self.delete_node(s);
-                    self.buf[s] = *x;
+                    romc.delete_node(s);
+                    romc.buf[s] = *x;
 
                     if s < F - 1 {
-                        self.buf[s + N] = *x;
+                        romc.buf[s + N] = *x;
                     }
 
                     s = (s + 1) & (N - 1);
                     r = (r + 1) & (N - 1);
-                    self.insert_node(r);
+                    romc.insert_node(r);
                 } else {
                     break;
                 }
             }
 
             while ind < last_match_len {
-                self.delete_node(s);
+                romc.delete_node(s);
                 s = (s + 1) & (N - 1);
                 r = (r + 1) & (N - 1);
                 len -= 1;
                 if len != 0 {
-                    self.insert_node(r);
+                    romc.insert_node(r);
                 }
                 ind += 1;
             }
@@ -237,7 +239,7 @@ impl Romc {
         out
     }
 
-    pub fn decode(&mut self, input: &[u8]) -> Vec<u8> {
+    pub fn decode(input: &[u8]) -> Vec<u8> {
         let mut i = input.iter();
         let decomp_size = match i.next() {
             Some(x) => *x as usize * FOUR_MBIT,
@@ -248,8 +250,10 @@ impl Romc {
         let mut out = vec![];
         let mut r = N - F;
 
+        let mut romc = Romc::default();
+
         for i in 0..r {
-            self.buf[i] = 0xff;
+            romc.buf[i] = 0xff;
         }
 
         let mut flags = 7;
@@ -275,7 +279,7 @@ impl Romc {
 
                 if cur_size < decomp_size {
                     out.push(c);
-                    self.buf[r] = c;
+                    romc.buf[r] = c;
                     r += 1;
                     r &= N - 1;
                     cur_size += 1;
@@ -293,10 +297,10 @@ impl Romc {
                 k |= (j << 8) & 0xf00;
                 j = ((j >> 4) & 0x0f) + THRESHOLD;
                 for _ in 0..=j {
-                    let c = self.buf[((r as isize - k as isize - 1) & (N - 1) as isize) as usize];
+                    let c = romc.buf[((r as isize - k as isize - 1) & (N - 1) as isize) as usize];
                     if cur_size < decomp_size {
                         out.push(c);
-                        self.buf[r] = c;
+                        romc.buf[r] = c;
                         r += 1;
                         r &= N - 1;
                         cur_size += 1;

@@ -1,320 +1,245 @@
+use std::{
+    io,
+    path::{Component, Path},
+};
+
 use thiserror::Error;
+
+const MAGIC: u32 = 0x55aa382d;
+const NODE: usize = 12;
+const DATA_ALIGN: usize = 0x20;
+
+fn read_be32(d: &[u8], i: usize) -> Result<u32, U8Error> {
+    let bytes = d
+        .get(i..)
+        .and_then(|d| d.get(..4))
+        .ok_or(U8Error::InvalidNode)?;
+    Ok(u32::from_be_bytes(
+        bytes.try_into().expect("should have 4 elements"),
+    ))
+}
+
+fn write_be32(d: &mut [u8], i: usize, v: u32) {
+    d[i..][..4].copy_from_slice(&v.to_be_bytes());
+}
+
+fn align_num(num: usize, align: usize) -> usize {
+    num.div_ceil(align) * align
+}
 
 #[derive(Error, Debug)]
 pub enum U8Error {
-    #[error("attempted to read `{0}` byte(s) out of bounds (index: `{1}, length: `{2}`)")]
-    IndexOutOfBounds(usize, usize, usize),
-    #[error("could not find file or folder at path: `{0}`")]
-    FileOrFolderNotFound(String),
-    #[error("entry is not a file")]
-    NotAFile,
-    #[error("invalid header")]
-    InvalidHeader,
-    #[error("invalid string, bytes: {0:x?}")]
-    InvalidString(Vec<u8>),
+    #[error("invalid magic")]
+    InvalidMagic,
+    #[error("invalid node kind")]
+    InvalidKind,
+    #[error("io error: {0}")]
+    IoError(#[from] io::Error),
+    #[error("path doesn't exist")]
+    InvalidPath,
+    #[error("invalid node")]
+    InvalidNode,
 }
 
-#[derive(Debug)]
-pub enum Entry {
-    File(File),
-    Folder(Folder),
-    None,
-}
-
-impl Entry {
-    pub fn find_entry(&mut self, path: &str) -> Result<&mut Entry, U8Error> {
-        if let Some((name, remaining)) = path.split_once('/') {
-            match self {
-                Entry::File(_) => (),
-                Entry::Folder(Folder {
-                    name: folder_name,
-                    contents,
-                }) if *folder_name == name => {
-                    for entry in contents {
-                        if let Ok(x) = entry.find_entry(remaining) {
-                            return Ok(x);
-                        }
-                    }
-                }
-                _ => (),
-            }
-        } else {
-            match self {
-                Entry::File(f) if f.name == path => return Ok(self),
-                _ => (),
-            }
-        }
-
-        Err(U8Error::FileOrFolderNotFound(path.to_string()))
-    }
-
-    pub fn get_file_contents(&mut self) -> Result<&mut Vec<u8>, U8Error> {
-        match self {
-            Entry::File(File { name: _, contents }) => Ok(contents),
-            _ => Err(U8Error::NotAFile),
-        }
-    }
-
-    pub fn set_file_contents(&mut self, c: Vec<u8>) -> Result<(), U8Error> {
-        match self {
-            Entry::File(File { name: _, contents }) => *contents = c,
-            _ => return Err(U8Error::NotAFile),
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Debug)]
-pub struct File {
-    pub name: String,
-    pub contents: Vec<u8>,
-}
-
-#[derive(Debug)]
-pub struct Folder {
-    pub name: String,
-    pub contents: Vec<Entry>,
-}
-
-#[derive(Debug)]
-pub struct U8Unpacker<'a> {
-    data: &'a Vec<u8>,
+#[derive(Clone, Copy)]
+pub struct Node {
     index: usize,
-    pub node_count: usize,
-    pub str_table_index: usize,
-    pub data_index: usize,
-    num: usize,
+    is_dir: bool,
+    name_offset: usize,
+    data_offset: usize,
+    size: usize,
 }
 
-impl<'a> U8Unpacker<'a> {
-    pub fn new(data: &'a Vec<u8>) -> Self {
-        Self {
-            data,
-            index: 0,
-            node_count: 0,
-            str_table_index: 0,
-            data_index: 0,
-            num: 1,
-        }
-    }
+pub struct U8Archive<'a> {
+    buf: &'a mut Vec<u8>,
+    root: usize,
+    nodes: usize,
+    strings: usize,
+}
 
-    pub fn unpack(&mut self) -> Result<Entry, U8Error> {
-        if self.get_u32()? != 0x55aa382d || self.get_u32()? != 0x20 {
-            return Err(U8Error::InvalidHeader);
+impl<'a> U8Archive<'a> {
+    pub fn new(buf: &'a mut Vec<u8>) -> Result<Self, U8Error> {
+        if read_be32(buf, 0).map_err(|_| U8Error::InvalidMagic)? != MAGIC {
+            return Err(U8Error::InvalidMagic);
         }
 
-        self.seek(4);
-        self.data_index = self.get_u32()? as usize;
-        self.seek(16 + 8);
-        self.node_count = self.get_u32()? as usize - 1;
-        self.str_table_index = self.index + self.node_count * 0xc;
+        let root = read_be32(buf, 4)? as usize;
 
-        self.parse_entries()
-    }
+        let mut arc = U8Archive {
+            buf,
+            root,
+            nodes: 1,
+            strings: 0,
+        };
 
-    fn parse_entries(&mut self) -> Result<Entry, U8Error> {
-        let ty = self.get_u16()?;
-        let name_offset = self.get_u16()? as usize;
-        let data_offset = self.get_u32()?;
-        let size = self.get_u32()?;
-        self.num += 1;
-
-        if ty == 0 {
-            Ok(Entry::File(File {
-                name: self.get_string(name_offset)?,
-                contents: self
-                    .data
-                    .get(data_offset as usize..(data_offset + size) as usize)
-                    .ok_or(U8Error::IndexOutOfBounds(
-                        size as usize,
-                        data_offset as usize,
-                        self.data.len(),
-                    ))?
-                    .to_vec(),
-            }))
-        } else if ty == 0x0100 {
-            let mut contents = vec![];
-            while self.num <= size as usize && self.num <= self.node_count {
-                contents.push(self.parse_entries()?);
-            }
-            Ok(Entry::Folder(Folder {
-                name: self.get_string(name_offset)?,
-                contents,
-            }))
-        } else {
-            Ok(Entry::None)
+        let root_node = arc.read_node(0)?;
+        if !root_node.is_dir || root_node.size == 0 {
+            return Err(U8Error::InvalidNode);
         }
+
+        let nodes = root_node.size;
+        let strings = nodes
+            .checked_mul(NODE)
+            .and_then(|n| n.checked_add(root))
+            .filter(|&s| s <= arc.buf.len())
+            .ok_or(U8Error::InvalidNode)?;
+
+        arc.nodes = nodes;
+        arc.strings = strings;
+
+        Ok(arc)
     }
 
-    fn get_bytes(&mut self, count: usize) -> Result<&[u8], U8Error> {
-        self.index += count;
-        self.data
-            .get(self.index - count..self.index)
-            .ok_or(U8Error::IndexOutOfBounds(
-                count,
-                self.index - count,
-                self.data.len(),
-            ))
+    fn node_offset(&self, i: usize) -> usize {
+        self.root + i * NODE
     }
 
-    fn get_u16(&mut self) -> Result<u16, U8Error> {
-        Ok(u16::from_be_bytes(self.get_bytes(2)?.try_into().unwrap()))
-    }
-
-    fn get_u32(&mut self) -> Result<u32, U8Error> {
-        Ok(u32::from_be_bytes(self.get_bytes(4)?.try_into().unwrap()))
-    }
-
-    fn get_string(&mut self, start: usize) -> Result<String, U8Error> {
-        let mut i = self.str_table_index + start;
-        while *self
-            .data
-            .get(i)
-            .ok_or(U8Error::IndexOutOfBounds(1, i, self.data.len()))?
-            != b'\0'
-        {
-            i += 1;
+    fn read_node(&self, i: usize) -> Result<Node, U8Error> {
+        if i >= self.nodes {
+            return Err(U8Error::InvalidNode);
         }
-        i += 1;
 
-        let bytes = self
-            .data
-            .get(self.str_table_index + start..i - 1)
-            .ok_or(U8Error::IndexOutOfBounds(1, i, self.data.len()))?
-            .to_vec();
-        String::from_utf8(bytes).map_err(|_| {
-            U8Error::InvalidString(
-                self.data
-                    .get(self.str_table_index + start..i - 1)
-                    .ok_or(U8Error::IndexOutOfBounds(1, i, self.data.len()))
-                    .unwrap()
-                    .to_vec(),
-            )
+        let offset = self.node_offset(i);
+        let data = self
+            .buf
+            .get(offset..)
+            .and_then(|d| d.get(..NODE))
+            .ok_or(U8Error::InvalidNode)?;
+
+        let a = read_be32(data, 0)?;
+        let is_dir = match a >> 24 {
+            0 => false,
+            1 => true,
+            _ => return Err(U8Error::InvalidKind),
+        };
+        let name_offset = (a & 0xFFFFFF) as usize;
+        let data_offset = read_be32(data, 4)? as usize;
+        let size = read_be32(data, 8)? as usize;
+
+        Ok(Node {
+            index: i,
+            is_dir,
+            name_offset,
+            data_offset,
+            size,
         })
     }
 
-    fn seek(&mut self, count: usize) {
-        self.index += count;
-    }
-}
-
-pub struct U8Packer {
-    strings: Vec<u8>,
-    data: Vec<u8>,
-    out: Vec<u8>,
-    num_nodes: u32,
-    strings_size: u32,
-    node_idx: u32,
-}
-
-impl Default for U8Packer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl U8Packer {
-    pub fn new() -> Self {
-        Self {
-            strings: vec![0],
-            data: vec![],
-            out: vec![],
-            num_nodes: 0,
-            strings_size: 1,
-            node_idx: 1,
-        }
+    fn read_name(&self, n: &Node) -> Result<&[u8], U8Error> {
+        let name_buf = self
+            .buf
+            .get(self.strings + n.name_offset..)
+            .ok_or(U8Error::InvalidNode)?;
+        let name_end = name_buf
+            .iter()
+            .position(|&x| x == 0)
+            .ok_or(U8Error::InvalidNode)?;
+        Ok(&name_buf[..name_end])
     }
 
-    pub fn pack(&mut self, input: Entry) -> Vec<u8> {
-        self.out.push(1);
-        self.out.resize(8, 0);
-        self.calc_sizes(&input);
-        self.out
-            .append(&mut u32::to_be_bytes(self.num_nodes + 1).to_vec());
-        let mut e = self.encode_entry(input);
-        let mut head = vec![0x55, 0xaa, 0x38, 0x2d, 0x00, 0x00, 0x00, 0x20];
-        head.append(
-            &mut u32::to_be_bytes((self.out.len() + self.strings.len() + e.len()) as u32).to_vec(),
-        );
-        let data_offset =
-            align((self.out.len() + self.strings.len() + e.len()) as u32, 0x40) + 0x20;
-        head.append(&mut u32::to_be_bytes(data_offset as u32).to_vec());
-        head.resize(head.len() + 16, 0);
-        self.out.append(&mut e);
-        head.append(&mut self.out);
-        head.append(&mut self.strings);
-        head.resize(align(head.len() as u32, 0x20), 0);
-        head.append(&mut self.data);
-        head
-    }
+    pub fn open<P: AsRef<Path>>(&self, path: P) -> Result<Node, U8Error> {
+        let mut cur = self.read_node(0)?;
 
-    fn calc_sizes(&mut self, entry: &Entry) {
-        match entry {
-            Entry::File(file) => {
-                self.num_nodes += 1;
-                self.strings_size += file.name.len() as u32 + 1;
+        for c in path.as_ref().components() {
+            let name = match c {
+                Component::Normal(name) => name.as_encoded_bytes(),
+                Component::CurDir => b".",
+                Component::RootDir => continue,
+                Component::ParentDir => {
+                    if !cur.is_dir {
+                        return Err(U8Error::InvalidPath);
+                    }
+                    cur = self.read_node(cur.data_offset)?;
+                    continue;
+                }
+                Component::Prefix(_) => return Err(U8Error::InvalidPath),
+            };
+
+            if !cur.is_dir {
+                return Err(U8Error::InvalidPath);
             }
-            Entry::Folder(folder) => {
-                self.num_nodes += 1;
-                self.strings_size += folder.name.len() as u32 + 1;
-                for e in &folder.contents {
-                    self.calc_sizes(e);
+
+            let end = cur.size.min(self.nodes);
+            let mut i = cur.index + 1;
+            let mut found = None;
+            while i < end {
+                let n = self.read_node(i)?;
+                if self.read_name(&n)? == name {
+                    found = Some(n);
+                    break;
+                }
+                i = if n.is_dir {
+                    if n.size <= i {
+                        return Err(U8Error::InvalidNode);
+                    }
+                    n.size
+                } else {
+                    i + 1
+                };
+            }
+
+            cur = found.ok_or(U8Error::InvalidPath)?;
+        }
+
+        Ok(cur)
+    }
+
+    pub fn read(&self, n: &Node) -> Result<&[u8], U8Error> {
+        if n.is_dir {
+            return Err(U8Error::InvalidKind);
+        }
+        self.buf
+            .get(n.data_offset..)
+            .and_then(|d| d.get(..n.size))
+            .ok_or(U8Error::InvalidNode)
+    }
+
+    pub fn replace_file(&mut self, n: &mut Node, data: &[u8]) -> Result<(), U8Error> {
+        if n.is_dir {
+            return Err(U8Error::InvalidKind);
+        }
+        if n.data_offset.checked_add(n.size).is_none_or(|end| end > self.buf.len()) {
+            return Err(U8Error::InvalidNode);
+        }
+        let new_size = u32::try_from(data.len()).map_err(|_| U8Error::InvalidNode)?;
+
+        let mut next = self.buf.len();
+        for i in 1..self.nodes {
+            let node = self.read_node(i)?;
+            if !node.is_dir && node.data_offset > n.data_offset {
+                next = next.min(node.data_offset);
+            }
+        }
+        let available = next - n.data_offset;
+
+        if data.len() <= available {
+            let start = n.data_offset;
+            self.buf[start..][..data.len()].copy_from_slice(data);
+            let old_end = start + n.size.max(data.len());
+            self.buf[start + data.len()..old_end].fill(0);
+        } else {
+            let shift = align_num(data.len() - available, DATA_ALIGN);
+            let padding = available + shift - data.len();
+            self.buf.splice(
+                n.data_offset..next,
+                data.iter().copied().chain(std::iter::repeat_n(0, padding)),
+            );
+
+            for i in 1..self.nodes {
+                let node = self.read_node(i)?;
+                if !node.is_dir && node.data_offset > n.data_offset {
+                    let new_offset = u32::try_from(node.data_offset + shift)
+                        .map_err(|_| U8Error::InvalidNode)?;
+                    let off = self.node_offset(i);
+                    write_be32(self.buf, off + 4, new_offset);
                 }
             }
-            Entry::None => (),
-        }
-    }
-
-    fn encode_entry(&mut self, entry: Entry) -> Vec<u8> {
-        let mut out = vec![];
-        match entry {
-            Entry::File(mut file) => {
-                self.node_idx += 1;
-                out.push(0);
-                out.push(0);
-                out.append(&mut u16::to_be_bytes(self.strings.len() as u16).to_vec());
-                self.strings.append(&mut file.name.as_bytes().to_vec());
-                self.strings.push(0);
-                out.append(
-                    &mut u32::to_be_bytes(
-                        align(0x2c + self.strings_size + (self.num_nodes) * 0xc, 0x20) as u32
-                            + self.data.len() as u32,
-                    )
-                    .to_vec(),
-                );
-                out.append(&mut u32::to_be_bytes(file.contents.len() as u32).to_vec());
-                self.data.append(&mut file.contents);
-                self.data.resize(align(self.data.len() as u32, 0x20), 0);
-            }
-            Entry::Folder(folder) => {
-                self.node_idx += 1;
-                out.push(1);
-                out.push(0);
-                out.append(&mut u16::to_be_bytes(self.strings.len() as u16).to_vec());
-                self.strings.append(&mut folder.name.as_bytes().to_vec());
-                self.strings.push(0);
-                out.resize(out.len() + 4, 0);
-
-                let mut sub = vec![];
-                for e in folder.contents {
-                    sub.append(&mut self.encode_entry(e));
-                }
-
-                out.append(&mut u32::to_be_bytes(self.node_idx).to_vec());
-                out.append(&mut sub);
-            }
-            Entry::None => (),
         }
 
-        out
-    }
-}
+        let off = self.node_offset(n.index);
+        write_be32(self.buf, off + 8, new_size);
+        n.size = data.len();
 
-fn align(num: u32, amt: usize) -> usize {
-    if !(num as usize).is_multiple_of(amt) {
-        amt * ((num as usize / amt) + 1)
-    } else {
-        num as usize
+        Ok(())
     }
 }
