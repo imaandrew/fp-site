@@ -1,3 +1,5 @@
+import type { ResultType } from "../../wasm/pkg/fp_web_patcher";
+
 export type Platform = "n64" | "wii" | "wiiu";
 
 export class PatcherState {
@@ -15,7 +17,7 @@ export class PatcherState {
   title: string = $state("");
 
   // WiiU options
-  returnZip = $state(false);
+  resultType: ResultType = $state("zip");
   enableDarkFilter = $state(false);
   enableWidescreen = $state(false);
 
@@ -42,11 +44,7 @@ export class PatcherState {
       case "wii":
         return `${this.tag}-${this.ver}.wad`;
       case "wiiu":
-        if (this.returnZip) {
-          return `${this.tag}-${this.ver}.zip`;
-        } else {
-          return `${this.tag}-${this.ver}.tar`;
-        }
+        return `${this.tag}-${this.ver}.${this.resultType}`;
     }
   });
 

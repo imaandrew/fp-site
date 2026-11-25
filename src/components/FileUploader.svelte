@@ -44,11 +44,11 @@
           if (file.name.toLowerCase().endsWith(".zip")) {
             patcher.romHashMessage = "Wii U Archive";
             patcher.platform = "wiiu";
-            patcher.returnZip = true;
+            patcher.resultType = "zip";
           } else if (file.name.toLowerCase().endsWith(".tar")) {
             patcher.romHashMessage = "Wii U Archive";
             patcher.platform = "wiiu";
-            patcher.returnZip = false;
+            patcher.resultType = "tar";
           } else {
             patcher.ver = "";
             patcher.romHashMessage = "Unknown base file";
@@ -66,11 +66,11 @@
     if (!f) {
       return;
     }
-    patcher.inputFile = f;
     if (f.size >= 70000000) {
       patcher.showError("File too big");
       return;
     }
+    patcher.inputFile = f;
     await assignFileHash(f);
   }
 </script>
