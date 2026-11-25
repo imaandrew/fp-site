@@ -15,26 +15,26 @@
         case ROM_CRC.US_Z64:
         case ROM_CRC.US_V64:
         case ROM_CRC.US_N64:
-          patcher.ver = "us";
+          patcher.region = "us";
           patcher.romHashMessage = "Valid US ROM";
           patcher.platform = "n64";
           break;
         case ROM_CRC.JP_Z64:
         case ROM_CRC.JP_V64:
         case ROM_CRC.JP_N64:
-          patcher.ver = "jp";
+          patcher.region = "jp";
           patcher.romHashMessage = "Valid JP ROM";
           patcher.platform = "n64";
           break;
         case ROM_CRC.US_WAD:
-          patcher.ver = "us";
+          patcher.region = "us";
           patcher.romHashMessage = "Valid US WAD";
           patcher.platform = "wii";
           patcher.channelId = "FPUS";
           patcher.title = "fp-US";
           break;
         case ROM_CRC.JP_WAD:
-          patcher.ver = "jp";
+          patcher.region = "jp";
           patcher.romHashMessage = "Valid JP WAD";
           patcher.platform = "wii";
           patcher.channelId = "FPJP";
@@ -50,7 +50,7 @@
             patcher.platform = "wiiu";
             patcher.resultType = "tar";
           } else {
-            patcher.ver = "";
+            patcher.region = null;
             patcher.romHashMessage = "Unknown base file";
           }
           break;

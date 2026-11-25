@@ -1,10 +1,10 @@
-import type { ResultType } from "../../wasm/pkg/fp_web_patcher";
+import type { Region, ResultType } from "../../wasm/pkg/fp_web_patcher";
 
 export type Platform = "n64" | "wii" | "wiiu";
 
 export class PatcherState {
   // Latest FP release
-  ver: string = $state("");
+  region: Region | null = $state(null);
   tag: string = $state("");
 
   // ROM file vars
@@ -34,23 +34,23 @@ export class PatcherState {
   building = $state(false);
 
   outFileName: string = $derived.by(() => {
-    if (this.tag === "" || this.ver === "") {
+    if (this.tag === "" || this.region === null) {
       return "";
     }
 
     switch (this.platform) {
       case "n64":
-        return `${this.tag}-${this.ver}.z64`;
+        return `${this.tag}-${this.region}.z64`;
       case "wii":
-        return `${this.tag}-${this.ver}.wad`;
+        return `${this.tag}-${this.region}.wad`;
       case "wiiu":
-        return `${this.tag}-${this.ver}.${this.resultType}`;
+        return `${this.tag}-${this.region}.${this.resultType}`;
     }
   });
 
   disableButton: boolean = $derived(
     this.building ||
-      this.ver === "" ||
+      this.region === null ||
       this.inputFile === null ||
       this.tag === "" ||
       this.outFileName === "" ||

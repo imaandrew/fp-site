@@ -40,11 +40,12 @@
     patcher.isAlertVisible = false;
     patcher.reloadAlert++;
     if (!patcher.inputFile) return;
+    if (!patcher.region) return;
     patcher.building = true;
 
     try {
       const patchFile = await getS3File(
-        `fp/${patcher.tag}/${patcher.ver}.xdelta`,
+        `fp/${patcher.tag}/${patcher.region}.xdelta`,
       );
       const input = await readFileAsUint8Array(patcher.inputFile);
 

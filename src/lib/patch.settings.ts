@@ -1,9 +1,7 @@
 import type { PatcherState, Platform } from "$lib/patcherState.svelte";
 import { getS3File, swapBytes } from "$lib/util";
 
-import type {
-  PatcherSettings,
-} from "../../wasm/pkg/fp_web_patcher";
+import type { PatcherSettings } from "../../wasm/pkg/fp_web_patcher";
 
 export interface PlatformPatcher {
   patch(input: Uint8Array, patchFile: Uint8Array): Promise<Worker>;
@@ -16,16 +14,19 @@ type SettingsBuilder = (
 
 const n64: SettingsBuilder = async (_s, input, romPatch) => {
   swapBytes(input);
-  return new Promise((resolve) =>
-    { resolve({ n64: { input, rom_patch: romPatch } }); },
-  );
+  return new Promise((resolve) => {
+    resolve({ n64: { input, rom_patch: romPatch } });
+  });
 };
 
 const wii: SettingsBuilder = async (s, input, romPatch) => {
+  if (!s.region) {
+    throw new Error("region not set");
+  }
   const [memPatch, hbPatch, hbBin] = await Promise.all([
     getS3File("gzi/mem_patch.gzi"),
-    getS3File(`gzi/hb_${s.ver}.gzi`),
-    getS3File(`hb/${s.ver}.bin`),
+    getS3File(`gzi/hb_${s.region}.gzi`),
+    getS3File(`hb/${s.region}.bin`),
   ]);
 
   const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
@@ -50,6 +51,9 @@ const wii: SettingsBuilder = async (s, input, romPatch) => {
 };
 
 const wiiu: SettingsBuilder = async (s, input, romPatch) => {
+  if (!s.region) {
+    throw new Error("region not set");
+  }
   let frameLayoutPath = "wiiu/FrameLayout";
   if (s.enableDarkFilter) {
     frameLayoutPath += "_dark";
@@ -59,7 +63,7 @@ const wiiu: SettingsBuilder = async (s, input, romPatch) => {
   }
 
   const [config, frameLayout] = await Promise.all([
-    getS3File(`wiiu/${s.ver}.ini`),
+    getS3File(`wiiu/${s.region}.ini`),
     getS3File(`${frameLayoutPath}.arc`),
   ]);
 
@@ -69,10 +73,9 @@ const wiiu: SettingsBuilder = async (s, input, romPatch) => {
       rom_patch: romPatch,
       enable_dark_filter: s.enableDarkFilter,
       enable_widescreen: s.enableWidescreen,
-      name: `fp-${s.tag}-${s.ver}`,
       config,
-      result_type: s.resultType,
       frame_layout: frameLayout,
+      region: s.region,
     },
   };
 };

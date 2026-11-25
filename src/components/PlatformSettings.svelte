@@ -9,6 +9,14 @@
 </script>
 
 <div class="platform-settings mb-6 grid gap-1">
+  {#if patcher.platform === "wiiu"}
+    <div transition:slide class="space-y-4">
+      <div class="flex gap-5">
+        <Radio name="version" value="us" bind:group={patcher.region}>US</Radio>
+        <Radio name="version" value="jp" bind:group={patcher.region}>JP</Radio>
+      </div>
+    </div>
+  {/if}
   <div class="flex items-center py-5 whitespace-nowrap">
     <p class="mr-3 text-left">Output file:</p>
     <Input type="text" id="outfile" bind:value={patcher.outFileName} required />
@@ -37,10 +45,6 @@
   {/if}
   {#if patcher.platform === "wiiu"}
     <div transition:slide class="space-y-4">
-      <div class="flex gap-5">
-        <Radio name="version" value="us" bind:group={patcher.ver}>US</Radio>
-        <Radio name="version" value="jp" bind:group={patcher.ver}>JP</Radio>
-      </div>
       <Checkbox bind:checked={patcher.enableDarkFilter}>Dark filter</Checkbox>
       <Checkbox bind:checked={patcher.enableWidescreen}>Widescreen</Checkbox>
     </div>

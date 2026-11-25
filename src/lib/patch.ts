@@ -7,7 +7,7 @@ export interface WorkerResponse {
 }
 
 export async function runPatch(settings: PatcherSettings): Promise<Uint8Array> {
-  const worker = new Worker(new URL("./patch.worker.ts", import.meta.url), {
+  const worker = new Worker(new URL("./worker.ts", import.meta.url), {
     type: "module",
   });
   try {

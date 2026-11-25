@@ -4,7 +4,11 @@ use tsify::{Ts, Tsify};
 use wasm_bindgen::prelude::*;
 use wii::{romc::Romc, u8::U8Error, wad::WadError};
 
-use crate::{n64::VCDiffDecoderError, wii::{u8::U8Archive, wad::Wad}, wiiu::WiiUError};
+use crate::{
+    n64::VCDiffDecoderError,
+    wii::{u8::U8Archive, wad::Wad},
+    wiiu::WiiUError,
+};
 extern crate console_error_panic_hook;
 
 #[derive(Error, Debug)]
@@ -25,9 +29,9 @@ pub mod n64;
 pub mod wii;
 pub mod wiiu;
 
-fn n64_decode(rom: &[u8], patch: &[u8]) -> Result<Vec<u8>, PatchError> {
+fn n64_decode(rom: &[u8], patch: &[u8]) -> Result<Vec<u8>, VCDiffDecoderError> {
     let mut x = n64::decode::VCDiffDecoder::new(patch, rom);
-    Ok(x.decode()?)
+    x.decode()
 }
 
 #[derive(Tsify, Deserialize)]
@@ -72,6 +76,13 @@ pub enum ResultType {
     Tar,
 }
 
+#[derive(Tsify, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+enum Region {
+    Us,
+    Jp,
+}
+
 #[derive(Tsify, Deserialize)]
 pub struct WiiUPatcherSettings {
     #[serde(with = "serde_bytes")]
@@ -82,14 +93,13 @@ pub struct WiiUPatcherSettings {
     rom_patch: Vec<u8>,
     enable_dark_filter: bool,
     enable_widescreen: bool,
-    name: String,
     #[serde(with = "serde_bytes")]
     #[tsify(type = "Uint8Array")]
     config: Vec<u8>,
-    result_type: ResultType,
     #[serde(with = "serde_bytes")]
     #[tsify(type = "Uint8Array")]
     frame_layout: Vec<u8>,
+    region: Region,
 }
 
 #[derive(Tsify, Deserialize)]
@@ -97,7 +107,7 @@ pub struct WiiUPatcherSettings {
 pub enum PatcherSettings {
     N64(N64PatcherSettings),
     Wii(WiiPatcherSettings),
-    WiiU(WiiUPatcherSettings)
+    WiiU(WiiUPatcherSettings),
 }
 
 #[wasm_bindgen]
@@ -111,7 +121,7 @@ pub fn patch(s: Ts<PatcherSettings>) -> Result<Vec<u8>, JsError> {
 }
 
 fn patch_n64(s: &N64PatcherSettings) -> Result<Vec<u8>, PatchError> {
-    n64_decode(&s.input, &s.rom_patch)
+    Ok(n64_decode(&s.input, &s.rom_patch)?)
 }
 
 fn patch_wii(s: &WiiPatcherSettings) -> Result<Vec<u8>, PatchError> {

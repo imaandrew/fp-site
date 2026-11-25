@@ -5,7 +5,9 @@ import __wbg_init, {
 
 self.onmessage = (e: MessageEvent<PatcherSettings>) => {
   __wbg_init()
-    .then(() => { postMessage({ ok: true, data: patch(e.data) }); })
+    .then(() => {
+      postMessage({ ok: true, data: patch(e.data) });
+    })
     .catch((e: unknown) => {
       console.error(e);
       postMessage({
