@@ -17,26 +17,22 @@ export async function getS3File(path: string): Promise<Uint8Array> {
 }
 
 interface JSONResponse {
-  name: string;
-  zipball_url: string;
-  tarball_url: string;
-  commit: {
-    sha: string;
-    url: string;
-  };
-  node_id: string;
+  tag_name: string;
 }
 
 export async function getLatestTag(): Promise<string> {
-  const response = await fetch("https://api.github.com/repos/jcog/fp/tags");
+  const response = await fetch(
+    "https://api.github.com/repos/jcog/fp/releases/latest",
+  );
   if (!response.ok) {
     throw new Error(
       `Error retrieving tag from GitHub API: ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as JSONResponse[];
-  const tag = data[0]?.name;
+  const data: JSONResponse = (await response.json()) as JSONResponse;
+  const tag = data.tag_name;
+  if (!tag) throw new Error("Invalid response from GitHub API");
   return tag;
 }
 

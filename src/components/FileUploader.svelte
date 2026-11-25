@@ -51,6 +51,7 @@
             patcher.resultType = "tar";
           } else {
             patcher.region = null;
+            patcher.platform = null;
             patcher.romHashMessage = "Unknown base file";
           }
           break;

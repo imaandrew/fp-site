@@ -13,7 +13,11 @@ export async function runPatch(settings: PatcherSettings): Promise<Uint8Array> {
   try {
     return await new Promise<Uint8Array>((resolve, reject) => {
       worker.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
-        data.ok ? resolve(data.data) : reject(new Error(data.error));
+        if (data.ok) {
+          resolve(data.data);
+        } else {
+          reject(new Error(data.error));
+        }
       };
       worker.onerror = (e) => {
         reject(new Error(e.message || "worker failed to load"));

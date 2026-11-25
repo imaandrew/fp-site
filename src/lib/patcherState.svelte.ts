@@ -10,7 +10,7 @@ export class PatcherState {
   // ROM file vars
   inputFile: File | null = $state(null);
   romHashMessage = $state("Choose base file");
-  platform: Platform = $state("n64");
+  platform: Platform | null = $state(null);
 
   // Wii options
   channelId: string = $state("");
@@ -34,7 +34,7 @@ export class PatcherState {
   building = $state(false);
 
   outFileName: string = $derived.by(() => {
-    if (this.tag === "" || this.region === null) {
+    if (this.tag === "" || this.region === null || this.platform === null) {
       return "";
     }
 

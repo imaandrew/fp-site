@@ -35,13 +35,14 @@
   }
 
   async function buildFp() {
-    patcher.buttonText = "Building...";
-    patcher.showLoading = true;
     patcher.isAlertVisible = false;
     patcher.reloadAlert++;
     if (!patcher.inputFile) return;
     if (!patcher.region) return;
+    if (!patcher.platform) return;
     patcher.building = true;
+    patcher.buttonText = "Building...";
+    patcher.showLoading = true;
 
     try {
       const patchFile = await getS3File(
