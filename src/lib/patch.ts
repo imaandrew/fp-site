@@ -1,4 +1,4 @@
-import type { PatcherSettings } from "../../wasm/pkg/fp_web_patcher";
+import type { PatcherSettings } from "$wasm/fp_web_patcher";
 
 export interface WorkerResponse {
   ok: boolean;

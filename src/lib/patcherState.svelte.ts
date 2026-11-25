@@ -1,4 +1,4 @@
-import type { Region, ResultType } from "../../wasm/pkg/fp_web_patcher";
+import type { Region, ResultType } from "$wasm/fp_web_patcher";
 
 export type Platform = "n64" | "wii" | "wiiu";
 
