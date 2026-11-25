@@ -5,27 +5,11 @@ use std::{
 
 use thiserror::Error;
 
+use crate::wii::{align_num, read_be32, write_be32};
+
 const MAGIC: u32 = 0x55aa382d;
 const NODE: usize = 12;
 const DATA_ALIGN: usize = 0x20;
-
-fn read_be32(d: &[u8], i: usize) -> Result<u32, U8Error> {
-    let bytes = d
-        .get(i..)
-        .and_then(|d| d.get(..4))
-        .ok_or(U8Error::InvalidNode)?;
-    Ok(u32::from_be_bytes(
-        bytes.try_into().expect("should have 4 elements"),
-    ))
-}
-
-fn write_be32(d: &mut [u8], i: usize, v: u32) {
-    d[i..][..4].copy_from_slice(&v.to_be_bytes());
-}
-
-fn align_num(num: usize, align: usize) -> usize {
-    num.div_ceil(align) * align
-}
 
 #[derive(Error, Debug)]
 pub enum U8Error {
@@ -59,11 +43,11 @@ pub struct U8Archive<'a> {
 
 impl<'a> U8Archive<'a> {
     pub fn new(buf: &'a mut Vec<u8>) -> Result<Self, U8Error> {
-        if read_be32(buf, 0).map_err(|_| U8Error::InvalidMagic)? != MAGIC {
+        if read_be32(buf, 0) != MAGIC {
             return Err(U8Error::InvalidMagic);
         }
 
-        let root = read_be32(buf, 4)? as usize;
+        let root = read_be32(buf, 4) as usize;
 
         let mut arc = U8Archive {
             buf,
@@ -106,15 +90,15 @@ impl<'a> U8Archive<'a> {
             .and_then(|d| d.get(..NODE))
             .ok_or(U8Error::InvalidNode)?;
 
-        let a = read_be32(data, 0)?;
+        let a = read_be32(data, 0);
         let is_dir = match a >> 24 {
             0 => false,
             1 => true,
             _ => return Err(U8Error::InvalidKind),
         };
         let name_offset = (a & 0xFFFFFF) as usize;
-        let data_offset = read_be32(data, 4)? as usize;
-        let size = read_be32(data, 8)? as usize;
+        let data_offset = read_be32(data, 4) as usize;
+        let size = read_be32(data, 8) as usize;
 
         Ok(Node {
             index: i,

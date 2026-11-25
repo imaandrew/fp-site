@@ -7,6 +7,7 @@ use thiserror::Error;
 use crate::{
     DolPatch,
     reader::{Reader, ReaderError, Writer},
+    wii::{align_num, read_be16, read_be32, read_be64, write_be32},
 };
 
 type Aes128CbcEnc = cbc::Encryptor<aes::Aes128>;
@@ -57,26 +58,6 @@ mod dol {
     pub const SECTION_LOAD_ADDR: usize = 0x48;
     pub const SECTION_SIZE: usize = 0x90;
     pub const DATA_OFFSET: usize = 0x1c;
-}
-
-fn read_be16(d: &[u8], i: usize) -> u16 {
-    u16::from_be_bytes(d[i..][..2].try_into().expect("should have 2 elements"))
-}
-
-fn read_be32(d: &[u8], i: usize) -> u32 {
-    u32::from_be_bytes(d[i..][..4].try_into().expect("should have 4 elements"))
-}
-
-fn read_be64(d: &[u8], i: usize) -> u64 {
-    u64::from_be_bytes(d[i..][..8].try_into().expect("should have 8 elements"))
-}
-
-fn write_be32(d: &mut [u8], i: usize, v: u32) {
-    d[i..][..4].copy_from_slice(&v.to_be_bytes());
-}
-
-fn align_num(num: usize, align: usize) -> usize {
-    num.div_ceil(align) * align
 }
 
 fn aes_cbc_dec(key: [u8; 16], iv: [u8; 16], data: &[u8]) -> Option<Vec<u8>> {
