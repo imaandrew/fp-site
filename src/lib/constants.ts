@@ -11,3 +11,6 @@ export const ROM_CRC = {
   US_WAD: 0xd469a9e1,
   JP_WAD: 0x6566e39a,
 };
+
+export const S3_URL =
+  "https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com";

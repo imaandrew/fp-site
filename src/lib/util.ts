@@ -3,12 +3,11 @@ import { buf } from "crc-32";
 import {
   ROM_HEADER_BYTESWAPPED,
   ROM_HEADER_LITTLEENDIAN,
+  S3_URL,
 } from "$lib/constants";
 
 export async function getS3File(path: string): Promise<Uint8Array> {
-  const response = await fetch(
-    `https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com/${path}?x-id=GetObject`,
-  );
+  const response = await fetch(`${S3_URL}/${path}`);
   if (!response.ok) {
     throw new Error(`Error retrieving s3 file: ${response.statusText}`);
   }
