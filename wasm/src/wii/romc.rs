@@ -33,8 +33,6 @@ impl Romc {
             self.right[i + 1] = N;
         }
 
-
-
         self.parent[..N].fill(N);
     }
 
