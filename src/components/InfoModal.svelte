@@ -9,7 +9,7 @@
 
 <Modal
   title="Input File Formats"
-  bind:open={patcher.clickOutsideModal}
+  bind:open={patcher.infoModalOpen}
   autoclose
   outsideclose
 >
