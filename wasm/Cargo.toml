@@ -15,7 +15,6 @@ aes = "0.9.4"
 aho-corasick = "1.1.5"
 cbc = { version = "0.2.1", features = ["alloc"] }
 console_error_panic_hook = "0.1.7"
-crc = "3.4.0"
 md5 = "0.8.1"
 serde = { version = "1.0.229", features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"

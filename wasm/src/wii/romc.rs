@@ -33,9 +33,9 @@ impl Romc {
             self.right[i + 1] = N;
         }
 
-        for i in 0..N {
-            self.parent[i] = N;
-        }
+
+
+        self.parent[..N].fill(N);
     }
 
     fn insert_node(&mut self, r: usize) {
@@ -149,9 +149,7 @@ impl Romc {
 
         romc.init();
 
-        for i in s..r {
-            romc.buf[i] = 0xff;
-        }
+        romc.buf[s..r].fill(0xff);
 
         let mut len: isize = 0;
 
@@ -252,9 +250,7 @@ impl Romc {
 
         let mut romc = Romc::default();
 
-        for i in 0..r {
-            romc.buf[i] = 0xff;
-        }
+        romc.buf[..r].fill(0xff);
 
         let mut flags = 7;
         let mut z = 7;
