@@ -2,34 +2,41 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:best-practices",
-    ":dependencyDashboard",
+    ":pinAllExceptPeerDependencies",
     "group:allNonMajor",
     "schedule:earlyMondays"
   ],
   "labels": ["dependencies"],
   "timezone": "America/Toronto",
   "automerge": true,
-  "automergeType": "pr",
-  "platformAutomerge": true,
   "major": {
     "automerge": false
   },
   "packageRules": [
     {
-      "description": "Group all GitHub Actions updates separately from standard dependencies",
+      "description": "Group non-major GitHub Actions updates separately from standard dependencies",
       "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
       "groupName": "github actions",
       "groupSlug": "github-actions"
     }
   ],
+  "customManagers": [
+    {
+      "description": "wasm-pack version installed in CI",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["tool: wasm-pack@(?<currentValue>\\S+)"],
+      "datasourceTemplate": "crate",
+      "depNameTemplate": "wasm-pack"
+    }
+  ],
   "vulnerabilityAlerts": {
-    "enabled": true,
     "automerge": false,
     "labels": ["security", "dependencies"]
   },
   "lockFileMaintenance": {
     "enabled": true,
-    "automerge": true,
     "schedule": ["before 5am on monday"]
   }
 }

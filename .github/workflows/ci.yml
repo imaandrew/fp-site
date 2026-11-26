@@ -27,7 +27,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: wasm
-      - run: cargo install wasm-pack
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack@0.15.1
 
       - name: Build wasm
         run: wasm-pack build wasm --target web --out-dir pkg
