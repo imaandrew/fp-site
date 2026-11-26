@@ -2,19 +2,10 @@
   import { Label } from "flowbite-svelte";
   import { onMount, setContext } from "svelte";
 
+  import { runPatch } from "$lib/patch";
+  import { buildSettings } from "$lib/patch.settings";
   import { PatcherState } from "$lib/patcherState.svelte";
-  import { n64Patcher } from "$lib/platforms/n64";
-  import type { PlatformPatcher } from "$lib/platforms/types";
-  import { createWiiPatcher } from "$lib/platforms/wii";
-  import { createWiiUPatcher } from "$lib/platforms/wiiu";
-  import {
-    getLatestTag,
-    getS3File,
-    readFileAsUint8Array,
-    saveUint8ArrayToFile,
-    swapBytes,
-  } from "$lib/util";
-  import { setupWorkerHandler } from "$lib/worker";
+  import { getLatestTag, getS3File, saveUint8ArrayToFile } from "$lib/util";
 
   import BuildControls from "./components/BuildControls.svelte";
   import FileUploader from "./components/FileUploader.svelte";
@@ -39,47 +30,21 @@
   }
 
   async function buildFp() {
-    patcher.buttonText = "Building...";
-    patcher.showLoading = true;
-    patcher.building = true;
     patcher.isAlertVisible = false;
-    patcher.reloadAlert++;
-    if (!patcher.inputFile) return;
+    const options = $state.snapshot(patcher.options);
+    if (options?.region == null) return;
+    patcher.building = true;
 
     try {
-      const patchFile = await getS3File(
-        `fp/${patcher.tag}/${patcher.ver}.xdelta`,
+      const romPatch = await getS3File(
+        `fp/${patcher.tag}/${options.region}.xdelta`,
       );
-      const input = await readFileAsUint8Array(patcher.inputFile);
-      swapBytes(input);
-
-      let platformPatcher: PlatformPatcher;
-      switch (patcher.platform) {
-        case "n64":
-          platformPatcher = n64Patcher;
-          break;
-        case "wii":
-          platformPatcher = createWiiPatcher(
-            patcher.ver,
-            patcher.channelId,
-            patcher.title,
-          );
-          break;
-        case "wiiu":
-          platformPatcher = createWiiUPatcher(
-            patcher.ver,
-            patcher.tag,
-            patcher.enableWidescreen,
-            patcher.enableDarkFilter,
-            patcher.returnZip,
-          );
-          break;
-      }
-
-      const worker = await platformPatcher.patch(input, patchFile);
-      setupWorkerHandler(worker, savePatchedFile, (msg) => {
-        patcher.showError(msg);
-      });
+      const settings = await buildSettings(
+        options,
+        patcher.inputData,
+        romPatch,
+      );
+      savePatchedFile(await runPatch(settings));
     } catch (error) {
       patcher.showError(error instanceof Error ? error.message : String(error));
     }

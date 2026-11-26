@@ -3,12 +3,11 @@ import { buf } from "crc-32";
 import {
   ROM_HEADER_BYTESWAPPED,
   ROM_HEADER_LITTLEENDIAN,
+  S3_URL,
 } from "$lib/constants";
 
 export async function getS3File(path: string): Promise<Uint8Array> {
-  const response = await fetch(
-    `https://fp-web-patcher-files.s3.ca-central-1.amazonaws.com/${path}?x-id=GetObject`,
-  );
+  const response = await fetch(`${S3_URL}/${path}`);
   if (!response.ok) {
     throw new Error(`Error retrieving s3 file: ${response.statusText}`);
   }
@@ -17,31 +16,26 @@ export async function getS3File(path: string): Promise<Uint8Array> {
 }
 
 interface JSONResponse {
-  name: string;
-  zipball_url: string;
-  tarball_url: string;
-  commit: {
-    sha: string;
-    url: string;
-  };
-  node_id: string;
+  tag_name: string;
 }
 
 export async function getLatestTag(): Promise<string> {
-  const response = await fetch("https://api.github.com/repos/jcog/fp/tags");
+  const response = await fetch(
+    "https://api.github.com/repos/jcog/fp/releases/latest",
+  );
   if (!response.ok) {
     throw new Error(
       `Error retrieving tag from GitHub API: ${response.statusText}`,
     );
   }
 
-  const data = (await response.json()) as JSONResponse[];
-  const tag = data[0]?.name;
+  const data: JSONResponse = (await response.json()) as JSONResponse;
+  const tag = data.tag_name;
+  if (!tag) throw new Error("Invalid response from GitHub API");
   return tag;
 }
 
-export async function getCrc(file: File): Promise<number> {
-  const data = await readFileAsUint8Array(file);
+export function getCrc(data: Uint8Array): number {
   return buf(data) >>> 0;
 }
 

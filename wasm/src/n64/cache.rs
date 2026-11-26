@@ -1,4 +1,4 @@
-use super::{read_byte, read_int, VCDiffDecoderError};
+use super::{VCDiffDecoderError, read_byte, read_int};
 
 pub struct AddrCache {
     near: Vec<u32>,

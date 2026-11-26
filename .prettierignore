@@ -1,6 +1,1 @@
-node_modules
-dist
-dist-ssr
-wasm/target
-wasm/pkg
 pnpm-lock.yaml

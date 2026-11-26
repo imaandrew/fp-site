@@ -2,63 +2,12 @@
   import { Fileupload, Helper, Label } from "flowbite-svelte";
   import { getContext } from "svelte";
 
-  import { ROM_CRC } from "$lib/constants";
   import type { PatcherState } from "$lib/patcherState.svelte";
-  import { getCrc } from "$lib/util";
+  import { detectOptions } from "$lib/platform";
+  import { getCrc, readFileAsUint8Array } from "$lib/util";
 
   const patcher = getContext<PatcherState>("patcher");
-
-  async function assignFileHash(file: File) {
-    try {
-      const crc = await getCrc(file);
-      switch (crc) {
-        case ROM_CRC.US_Z64:
-        case ROM_CRC.US_V64:
-        case ROM_CRC.US_N64:
-          patcher.ver = "us";
-          patcher.romHashMessage = "Valid US ROM";
-          patcher.platform = "n64";
-          break;
-        case ROM_CRC.JP_Z64:
-        case ROM_CRC.JP_V64:
-        case ROM_CRC.JP_N64:
-          patcher.ver = "jp";
-          patcher.romHashMessage = "Valid JP ROM";
-          patcher.platform = "n64";
-          break;
-        case ROM_CRC.US_WAD:
-          patcher.ver = "us";
-          patcher.romHashMessage = "Valid US WAD";
-          patcher.platform = "wii";
-          patcher.channelId = "FPUS";
-          patcher.title = "fp-US";
-          break;
-        case ROM_CRC.JP_WAD:
-          patcher.ver = "jp";
-          patcher.romHashMessage = "Valid JP WAD";
-          patcher.platform = "wii";
-          patcher.channelId = "FPJP";
-          patcher.title = "fp-JP";
-          break;
-        default:
-          if (file.name.toLowerCase().endsWith(".zip")) {
-            patcher.romHashMessage = "Wii U Archive";
-            patcher.platform = "wiiu";
-            patcher.returnZip = true;
-          } else if (file.name.toLowerCase().endsWith(".tar")) {
-            patcher.romHashMessage = "Wii U Archive";
-            patcher.platform = "wiiu";
-            patcher.returnZip = false;
-          } else {
-            patcher.ver = "";
-            patcher.romHashMessage = "Unknown base file";
-          }
-          break;
-      }
-    } catch (error) {
-      patcher.showError(error instanceof Error ? error.message : String(error));
-    }
-  }
+  const MAX_INPUT_SIZE = 70000000;
 
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -66,19 +15,21 @@
     if (!f) {
       return;
     }
-    patcher.inputFile = f;
-    if (f.size >= 70000000) {
+    if (f.size >= MAX_INPUT_SIZE) {
       patcher.showError("File too big");
       return;
     }
-    await assignFileHash(f);
+    patcher.inputData = await readFileAsUint8Array(f);
+    patcher.options = detectOptions(getCrc(patcher.inputData), f.name);
   }
 </script>
 
 <div class="w-5/6">
   <Label for="fileInput" class="pb-2"
-    >{patcher.romHashMessage}
-    <button id="b3" onclick={() => (patcher.clickOutsideModal = true)}>
+    >{patcher.inputData.length === 0
+      ? "Choose base file"
+      : (patcher.options?.romHashMessage ?? "Unknown base file")}
+    <button onclick={() => (patcher.infoModalOpen = true)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

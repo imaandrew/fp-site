@@ -1,97 +1,147 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use thiserror::Error;
+use tsify::{Ts, Tsify};
 use wasm_bindgen::prelude::*;
-use wii::{
-    romc::Romc,
-    u8::{U8Error, U8Packer, U8Unpacker},
-    wad::{Encoder, Parser, WadError},
+use wii::{romc::Romc, u8::U8Error, wad::WadError};
+
+use crate::{
+    n64::VCDiffDecoderError,
+    wii::{u8::U8Archive, wad::Wad},
+    wiiu::WiiUError,
 };
 extern crate console_error_panic_hook;
 
-impl From<U8Error> for String {
-    fn from(value: U8Error) -> Self {
-        format!("u8 error: {}", value)
-    }
-}
-
-impl From<WadError> for String {
-    fn from(value: WadError) -> Self {
-        format!("wad packer/unpacker error: {}", value)
-    }
+#[derive(Error, Debug)]
+pub enum PatchError {
+    #[error("invalid settings: {0}")]
+    Settings(#[from] serde_wasm_bindgen::Error),
+    #[error("n64: {0}")]
+    N64(#[from] VCDiffDecoderError),
+    #[error("wad: {0}")]
+    Wad(#[from] WadError),
+    #[error("u8 archive: {0}")]
+    U8(#[from] U8Error),
+    #[error("wii u: {0}")]
+    WiiU(#[from] WiiUError),
+    #[error(transparent)]
+    Slice(#[from] std::array::TryFromSliceError),
 }
 
 pub mod n64;
+mod reader;
 pub mod wii;
 pub mod wiiu;
 
-#[wasm_bindgen]
-pub fn n64_decode(rom: &[u8], patch: &[u8]) -> Result<Vec<u8>, String> {
-    console_error_panic_hook::set_once();
+fn n64_decode(rom: &[u8], patch: &[u8]) -> Result<Vec<u8>, VCDiffDecoderError> {
     let mut x = n64::decode::VCDiffDecoder::new(patch, rom);
-    x.decode().map_err(|e| format!("n64 error: {}", e))
+    x.decode()
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct WiiInjectSettings {
-    pub wad: Vec<u8>,
-    pub xdelta_patch: Vec<u8>,
+#[derive(Tsify, Deserialize)]
+pub struct N64PatcherSettings {
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    pub input: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    pub rom_patch: Vec<u8>,
+}
+
+#[derive(Tsify, Deserialize)]
+pub struct WiiPatcherSettings {
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    pub input: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    pub rom_patch: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
     pub gzi_patch: Vec<u8>,
     pub channel_id: String,
     pub title: String,
     pub dol_patch: DolPatch,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Tsify, Deserialize)]
 pub struct DolPatch {
     pub dol_num: usize,
     pub load_addr: u32,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
     pub data: Vec<u8>,
 }
 
-#[wasm_bindgen]
-pub fn wii_inject(s: JsValue) -> Result<Vec<u8>, String> {
-    console_error_panic_hook::set_once();
-    let s: WiiInjectSettings = serde_wasm_bindgen::from_value(s).map_err(|_| "Invalid settings")?;
-    let mut wad_parser = Parser::new(&s.wad);
-    let mut wad = wad_parser.decode()?;
-    let mut u8_unpack = U8Unpacker::new(&wad.contents[5]);
-    let mut content5 = u8_unpack.unpack()?;
-    let rom = content5.find_entry("./romc")?;
-    let mut romc_decode = Romc::new();
-    let decoded_rom = romc_decode.decode(rom.get_file_contents()?);
-    let patched_rom = n64_decode(&decoded_rom, &s.xdelta_patch)?;
-    let mut romc_encode = Romc::new();
-    let encoded_rom = romc_encode.encode(&patched_rom);
-    rom.set_file_contents(encoded_rom)?;
-    let mut u8_pack = U8Packer::new();
-    let content5 = u8_pack.pack(content5);
-    wad.contents[5] = content5;
-
-    wad.set_channel_id(&s.channel_id);
-    wad.set_channel_title(&s.title);
-    wad.set_region(3);
-    wad.tmd.header.sys_version[7] = 0x3d;
-
-    wad.parse_gzi_patch(&s.gzi_patch)?;
-    wad.patch_dol(s.dol_patch);
-
-    let mut wad_encoder = Encoder::new(&mut wad);
-    Ok(wad_encoder.encode()?)
+#[derive(Tsify, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ResultType {
+    Zip,
+    Tar,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct WiiUInjectSettings {
-    input_archive: Vec<u8>,
-    xdelta_patch: Vec<u8>,
+#[derive(Tsify, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+enum Region {
+    Us,
+    Jp,
+}
+
+#[derive(Tsify, Deserialize)]
+pub struct WiiUPatcherSettings {
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    input: Vec<u8>,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
+    rom_patch: Vec<u8>,
     enable_dark_filter: bool,
     enable_widescreen: bool,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
     config: Vec<u8>,
-    return_zip: bool,
+    #[serde(with = "serde_bytes")]
+    #[tsify(type = "Uint8Array")]
     frame_layout: Vec<u8>,
+    region: Region,
+}
+
+#[derive(Tsify, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PatcherSettings {
+    N64(N64PatcherSettings),
+    Wii(WiiPatcherSettings),
+    WiiU(WiiUPatcherSettings),
 }
 
 #[wasm_bindgen]
-pub fn wiiu_inject(s: JsValue) -> Result<Vec<u8>, String> {
+pub fn patch(s: Ts<PatcherSettings>) -> Result<Vec<u8>, JsError> {
     console_error_panic_hook::set_once();
-    let mut s: WiiUInjectSettings = serde_wasm_bindgen::from_value(s).unwrap();
-    wiiu::patch(&mut s).map_err(|e| format!("wiiu error: {}", e))
+    match s.to_rust()? {
+        PatcherSettings::N64(s) => Ok(patch_n64(&s)?),
+        PatcherSettings::Wii(s) => Ok(patch_wii(&s)?),
+        PatcherSettings::WiiU(mut s) => Ok(patch_wiiu(&mut s)?),
+    }
+}
+
+fn patch_n64(s: &N64PatcherSettings) -> Result<Vec<u8>, PatchError> {
+    Ok(n64_decode(&s.input, &s.rom_patch)?)
+}
+
+fn patch_wii(s: &WiiPatcherSettings) -> Result<Vec<u8>, PatchError> {
+    let mut wad = Wad::decode(&s.input)?;
+    let mut arc = U8Archive::new(wad.get_content(5)?)?;
+    let mut n = arc.open("./romc")?;
+    let rom = Romc::decode(arc.read(&n)?);
+    let patched_rom = n64_decode(&rom, &s.rom_patch)?;
+    arc.replace_file(&mut n, &Romc::encode(&patched_rom))?;
+    wad.set_title_id(s.channel_id.as_bytes().try_into()?)?;
+    wad.set_channel_title(&s.title)?;
+    wad.set_region(3);
+    wad.apply_gzi(&s.gzi_patch)?;
+    wad.apply_dol_patch(&s.dol_patch)?;
+    Ok(wad.encode())
+}
+
+fn patch_wiiu(s: &mut WiiUPatcherSettings) -> Result<Vec<u8>, PatchError> {
+    Ok(wiiu::patch(s)?)
 }

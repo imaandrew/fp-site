@@ -1,284 +1,176 @@
-use crate::n64_decode;
-use crate::WiiUInjectSettings;
-use crc::{Crc, CRC_16_ARC};
-use ouroboros::self_referencing;
-use std::io::{Cursor, Read, Seek, Write};
+use crate::n64::VCDiffDecoderError;
+use crate::{Region, WiiUPatcherSettings, n64_decode};
+use aho_corasick::{AhoCorasick, BuildError, MatchKind};
+use std::collections::HashSet;
+use std::io::{self, Cursor, Read, Seek, Write};
+use std::path::{Path, PathBuf};
 use std::str;
-use tar::{Archive, Builder, Entries, EntryType, Header};
+use tar::{Archive, Builder, Header};
 use thiserror::Error;
-use zip::{
-    result::ZipError,
-    write::{FileOptions, ZipWriter},
-    CompressionMethod, ZipArchive,
-};
-
-enum Ver {
-    Us,
-    Jp,
-}
+use zip::write::SimpleFileOptions;
+use zip::{CompressionMethod, ZipArchive, result::ZipError, write::ZipWriter};
 
 #[derive(Error, Debug)]
 pub enum WiiUError {
+    #[error("unknown archive format")]
+    UnknownArchive,
     #[error(transparent)]
     Zip(#[from] ZipError),
     #[error(transparent)]
     Io(#[from] std::io::Error),
-    #[error("could not locate game files")]
-    EndOfArchive,
-    #[error("{0}")]
-    PatchError(String),
-    #[error("invalid archive, missing game files")]
-    MissingFiles,
     #[error(transparent)]
     InvalidStr(#[from] std::str::Utf8Error),
+    #[error(transparent)]
+    AhoCorasick(#[from] BuildError),
+    #[error(transparent)]
+    Patcher(#[from] VCDiffDecoderError),
+    #[error("Invalid path: {0}")]
+    InvalidPath(PathBuf),
 }
 
-pub fn patch(s: &mut WiiUInjectSettings) -> Result<Vec<u8>, WiiUError> {
-    let c = Cursor::new(&s.input_archive);
-    let mut file_reader = get_iter(c, s.return_zip)?;
+const ZIP_MAGIC: [u8; 4] = [0x50, 0x4b, 0x03, 0x04];
+const TAR_MAGIC: [u8; 4] = [0x75, 0x73, 0x74, 0x61];
+const TAR_OFFSET: u64 = 0x101;
 
-    let mut cur_file;
-    let start_idx = loop {
-        cur_file = file_reader.next();
-        if cur_file.is_none() {
-            return Err(WiiUError::EndOfArchive);
-        }
+#[derive(PartialEq)]
+enum ArchiveFormat {
+    Unknown,
+    Zip,
+    Tar,
+}
 
-        match cur_file.as_ref().unwrap() {
-            Ok((path, _)) => {
-                if let Some(idx) = path
-                    .find("code/")
-                    .or(path.find("content/").or(path.find("meta/")))
-                {
-                    break idx;
-                } else {
-                    continue;
-                }
+pub fn patch(s: &mut WiiUPatcherSettings) -> Result<Vec<u8>, WiiUError> {
+    let replace_list: HashSet<&'static str> = HashSet::from([
+        "content/rom/UNMQE0.785",
+        "content/rom/Unmqj0.716",
+        "code/app.xml",
+        "meta/meta.xml",
+        "content/FrameLayout.arc",
+    ]);
+
+    let title_id = format!(
+        "000500007080{:02X}{:02X}",
+        if s.region == Region::Us { b'U' } else { b'J' },
+        (s.enable_dark_filter as u8) << 4 | (s.enable_widescreen as u8) << 5
+    );
+    let group_id = format!("0000{}", &title_id[10..14]);
+    let patterns = &[
+        "NACE",
+        "NAEJ",
+        "Paper Mario",
+        "マリオストーリー",
+        "0005000010199700",
+        "0005000010199600",
+        "00001997",
+        "00001996",
+    ];
+    let replacements = &[
+        "FPUS", "FPJP", "fp-us", "fp-jp", &title_id, &title_id, &group_id, &group_id,
+    ];
+
+    let ac = AhoCorasick::builder()
+        .match_kind(MatchKind::LeftmostLongest)
+        .build(patterns)?;
+
+    let replace_file = |p: &str, d: Vec<u8>| -> Result<Vec<u8>, WiiUError> {
+        match p {
+            "content/rom/UNMQE0.785" | "content/rom/Unmqj0.716" => {
+                Ok(n64_decode(&d, &s.rom_patch)?)
             }
-            Err(_) => return Err(cur_file.unwrap().unwrap_err()),
+            "content/config/UNMQE0.z64.ini" | "content/config/UNMQJ0.z64.ini" => {
+                Ok(std::mem::take(&mut s.config))
+            }
+            "code/app.xml" | "meta/meta.xml" => Ok(ac.replace_all_bytes(&d, replacements)),
+            "content/FrameLayout.arc" => Ok(std::mem::take(&mut s.frame_layout)),
+            _ => unreachable!(),
         }
     };
 
-    let mut file_writer = FileWriter::new(Cursor::new(vec![]), s.return_zip);
+    let mut c = Cursor::new(&s.input);
+    let mut sig = vec![0; 4];
+    c.read_exact(&mut sig)?;
+    let mut fmt = ArchiveFormat::Unknown;
+    if sig == ZIP_MAGIC {
+        fmt = ArchiveFormat::Zip;
+    } else {
+        c.seek(std::io::SeekFrom::Start(TAR_OFFSET))?;
+        c.read_exact(&mut sig)?;
+        if sig == TAR_MAGIC {
+            fmt = ArchiveFormat::Tar;
+        }
+    }
 
-    let mut ver = None;
-    let mut app_cfg = None;
-    let mut meta_cfg = None;
-    let crc = Crc::<u16>::new(&CRC_16_ARC);
-    let mut rom_digest = crc.digest();
-    let mut cfg_digest = crc.digest();
-    while let Some(file) = cur_file {
-        let (ref path, ref data) = file?;
-        if (path.ends_with(".ini") && !path.ends_with("config.ini")) || path.ends_with(".t64") {
-            cur_file = file_reader.next();
+    if fmt == ArchiveFormat::Unknown {
+        return Err(WiiUError::UnknownArchive);
+    }
+    c.seek(std::io::SeekFrom::Start(0))?;
+
+    let output = vec![];
+    Ok(match fmt {
+        ArchiveFormat::Zip => edit_zip(c, Cursor::new(output), &replace_list, replace_file)?,
+        ArchiveFormat::Tar => edit_tar(c, Cursor::new(output), &replace_list, replace_file)?,
+        ArchiveFormat::Unknown => unreachable!(),
+    }
+    .into_inner())
+}
+
+fn edit_zip<R: Read + io::Seek, W: Write + io::Seek>(
+    data: R,
+    out: W,
+    replace: &HashSet<&'static str>,
+    mut edit: impl FnMut(&str, Vec<u8>) -> Result<Vec<u8>, WiiUError>,
+) -> Result<W, WiiUError> {
+    let mut input = ZipArchive::new(data)?;
+    let mut output = ZipWriter::new(out);
+    let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
+
+    for i in 0..input.len() {
+        let mut f = input.by_index(i)?;
+        if !replace.contains(&*f.name()?) {
+            output.raw_copy_file(f)?;
             continue;
         }
 
-        match &path[start_idx..] {
-            "content/rom/UNMQE0.785" => {
-                ver = Some(Ver::Us);
-                let rom = patch_rom(data, &s.xdelta_patch)?;
-                file_writer.write_file("content/rom/UNMQE0.z64", &rom)?;
-                rom_digest.update(&rom);
-                file_writer.write_file("content/config/UNMQE0.z64.ini", &s.config)?;
-                cfg_digest.update(&s.config);
-            }
-            "content/rom/Unmqj0.716" => {
-                ver = Some(Ver::Jp);
-                let rom = patch_rom(data, &s.xdelta_patch)?;
-                file_writer.write_file("content/rom/UNMQJ0.z64", &rom)?;
-                rom_digest.update(&rom);
-                file_writer.write_file("content/config/UNMQJ0.z64.ini", &s.config)?;
-                cfg_digest.update(&s.config);
-            }
-            "code/app.xml" => app_cfg = Some(str::from_utf8(data)?.to_string()),
-            "meta/meta.xml" => meta_cfg = Some(str::from_utf8(data)?.to_string()),
-            "content/FrameLayout.arc" => {
-                file_writer.write_file("content/FrameLayout.arc", &s.frame_layout)?;
-            }
-            name => {
-                file_writer.write_file(name, data)?;
-            }
-        }
-        cur_file = file_reader.next();
+        let mut contents = Vec::with_capacity(f.size() as usize);
+        f.read_to_end(&mut contents)?;
+        output.start_file(&f.name()?, options)?;
+        output.write_all(&edit(&f.name()?, contents)?)?;
     }
 
-    let title_id = format!(
-        "0005000264{:04X}{:02X}",
-        ((rom_digest.finalize() as u32 + cfg_digest.finalize() as u32) >> 1) as u16,
-        if s.enable_dark_filter { 0x80 } else { 0 }
-            | if s.enable_widescreen { 0x40 } else { 0 }
-            | 4
-    );
-
-    let group_id = format!("0000{}{}", &title_id[10..12], &title_id[12..14]);
-
-    let mut app_str = app_cfg.ok_or(WiiUError::MissingFiles)?;
-    let mut meta_str = meta_cfg.ok_or(WiiUError::MissingFiles)?;
-    match ver.ok_or(WiiUError::MissingFiles)? {
-        Ver::Us => {
-            meta_str = meta_str
-                .replace("NACE", "NMQE")
-                .replace("Paper Mario", "fp-US")
-                .replace("00001997", &group_id)
-                .replace("0005000010199700", &title_id);
-            app_str = app_str
-                .replace("00001997", &group_id)
-                .replace("0005000010199700", &title_id);
-        }
-        Ver::Jp => {
-            meta_str = meta_str
-                .replace("NACJ", "NMQJ")
-                .replace("マリオストーリー", "fp-JP")
-                .replace("00001996", &group_id)
-                .replace("0005000010199600", &title_id);
-            app_str = app_str
-                .replace("00001996", &group_id)
-                .replace("0005000010199600", &title_id);
-        }
-    }
-
-    file_writer.write_file("code/app.xml", app_str.as_bytes())?;
-    file_writer.write_file("meta/meta.xml", meta_str.as_bytes())?;
-
-    match file_writer {
-        FileWriter::Zip(mut z) => Ok(z.finish()?.into_inner()),
-        FileWriter::Tar(mut t) => {
-            t.finish()?;
-            Ok(t.into_inner()?.into_inner())
-        }
-    }
+    Ok(output.finish()?)
 }
 
-fn patch_rom(file: &[u8], patch: &[u8]) -> Result<Vec<u8>, WiiUError> {
-    n64_decode(file, patch).map_err(WiiUError::PatchError)
-}
+fn edit_tar<R: Read, W: Write>(
+    data: R,
+    out: W,
+    replace: &HashSet<&'static str>,
+    mut edit: impl FnMut(&str, Vec<u8>) -> Result<Vec<u8>, WiiUError>,
+) -> Result<W, WiiUError> {
+    let mut input = Archive::new(data);
+    let mut output = Builder::new(out);
 
-struct ZipReader<'a> {
-    zip: ZipArchive<Cursor<&'a Vec<u8>>>,
-    idx: usize,
-}
-
-impl<'a> ZipReader<'a> {
-    fn build(input: Cursor<&'a Vec<u8>>) -> Result<Self, WiiUError> {
-        Ok(Self {
-            zip: ZipArchive::new(input)?,
-            idx: 0,
-        })
-    }
-}
-
-impl Iterator for ZipReader<'_> {
-    type Item = Result<(String, Vec<u8>), WiiUError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut file = loop {
-            if self.idx >= self.zip.len() {
-                return None;
-            }
-
-            match self.zip.by_index(self.idx) {
-                Ok(f) => {
-                    self.idx += 1;
-                    if !f.is_dir() {
-                        break f;
-                    }
-                }
-                Err(e) => return Some(Err(e.into())),
-            }
-        };
-
-        let mut contents = vec![];
-        if let Err(e) = file.read_to_end(&mut contents) {
-            return Some(Err(e.into()));
-        }
-        Some(Ok((file.name().to_string(), contents)))
-    }
-}
-
-#[self_referencing]
-struct TarReader<'a> {
-    tar: Archive<Cursor<&'a Vec<u8>>>,
-    #[borrows(mut tar)]
-    #[not_covariant]
-    entries: Entries<'this, Cursor<&'a Vec<u8>>>,
-}
-
-impl<'a> TarReader<'a> {
-    fn build(input: Cursor<&'a Vec<u8>>) -> Self {
-        TarReaderBuilder {
-            tar: Archive::new(input),
-            entries_builder: |archive| archive.entries().unwrap(),
-        }
-        .build()
-    }
-}
-
-impl Iterator for TarReader<'_> {
-    type Item = Result<(String, Vec<u8>), WiiUError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.with_mut(|x| loop {
-            match x.entries.next() {
-                Some(Ok(mut file)) => {
-                    if file.header().entry_type() == EntryType::Regular {
-                        let mut contents = vec![];
-                        if let Err(e) = file.read_to_end(&mut contents) {
-                            return Some(Err(e.into()));
-                        }
-                        match file.path() {
-                            Ok(p) => return Some(Ok((p.to_str().unwrap().to_string(), contents))),
-                            Err(e) => return Some(Err(e.into())),
-                        }
-                    }
-                }
-                Some(Err(e)) => {
-                    return Some(Err(e.into()));
-                }
-                None => return None,
-            }
-        })
-    }
-}
-
-type ArchiveIter<'a> = Box<dyn Iterator<Item = Result<(String, Vec<u8>), WiiUError>> + 'a>;
-fn get_iter(input: Cursor<&'_ Vec<u8>>, is_zip: bool) -> Result<ArchiveIter<'_>, WiiUError> {
-    if is_zip {
-        Ok(Box::new(ZipReader::build(input)?))
-    } else {
-        Ok(Box::new(TarReader::build(input)))
-    }
-}
-
-enum FileWriter<W: Write + Seek> {
-    Zip(ZipWriter<W>),
-    Tar(Builder<W>),
-}
-
-impl<W: Write + Seek> FileWriter<W> {
-    fn new(out: W, zip: bool) -> Self {
-        if zip {
-            FileWriter::Zip(ZipWriter::new(out))
-        } else {
-            FileWriter::Tar(Builder::new(out))
-        }
-    }
-
-    fn write_file(&mut self, path: &str, data: &[u8]) -> Result<(), WiiUError> {
-        match self {
-            FileWriter::Zip(z) => {
-                let options = FileOptions::default().compression_method(CompressionMethod::Stored);
-                z.start_file(path, options)?;
-                z.write_all(data)?;
-            }
-            FileWriter::Tar(t) => {
-                let mut header = Header::new_gnu();
-                header.set_size(data.len() as u64);
-                header.set_cksum();
-                t.append_data(&mut header, path, data)?;
-            }
+    for e in input.entries()? {
+        let mut e = e?;
+        let path = e
+            .path()?
+            .into_owned()
+            .into_string()
+            .map_err(WiiUError::InvalidPath)?;
+        let mut header = Header::new_gnu();
+        if !replace.contains(path.as_str()) {
+            header.set_size(e.size());
+            header.set_cksum();
+            output.append_data(&mut header, Path::new(&path), e)?;
+            continue;
         }
 
-        Ok(())
+        let mut contents = Vec::with_capacity(e.size() as usize);
+        e.read_to_end(&mut contents)?;
+        let p = edit(&path, contents)?;
+        header.set_size(p.len() as u64);
+        header.set_cksum();
+        output.append_data(&mut header, path, &*p)?;
     }
+
+    Ok(output.into_inner()?)
 }
