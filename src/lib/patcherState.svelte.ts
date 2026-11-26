@@ -1,71 +1,56 @@
-import type { Region, ResultType } from "$wasm/fp_web_patcher";
-
-export type Platform = "n64" | "wii" | "wiiu";
+import type { PlatformOptions } from "./platform";
 
 export class PatcherState {
   // Latest FP release
-  region: Region | null = $state(null);
   tag: string = $state("");
 
-  // ROM file vars
-  inputFile: File | null = $state(null);
-  romHashMessage = $state("Choose base file");
-  platform: Platform | null = $state(null);
-
-  // Wii options
-  channelId: string = $state("");
-  title: string = $state("");
-
-  // WiiU options
-  resultType: ResultType = $state("zip");
-  enableDarkFilter = $state(false);
-  enableWidescreen = $state(false);
-
-  // Visual options
-  clickOutsideModal = $state(false);
-  showLoading = $state(false);
-  buttonText = $state("Build");
+  inputData: Uint8Array = $state(new Uint8Array());
+  options: PlatformOptions | null = $state(null);
 
   // Alert options
   isAlertVisible = $state(false);
   alertText = $state("");
-  reloadAlert = $state(0);
 
   building = $state(false);
 
+  // Visual options
+  infoModalOpen = $state(false);
+  buttonText: string = $derived.by(() => {
+    return this.building ? "Building..." : "Build";
+  });
+
   outFileName: string = $derived.by(() => {
-    if (this.tag === "" || this.region === null || this.platform === null) {
+    if (this.tag === "" || this.options?.region == null) {
       return "";
     }
 
-    switch (this.platform) {
+    switch (this.options.platform) {
       case "n64":
-        return `${this.tag}-${this.region}.z64`;
+        return `${this.tag}-${this.options.region}.z64`;
       case "wii":
-        return `${this.tag}-${this.region}.wad`;
+        return `${this.tag}-${this.options.region}.wad`;
       case "wiiu":
-        return `${this.tag}-${this.region}.${this.resultType}`;
+        return `${this.tag}-${this.options.region}.${this.options.resultType}`;
     }
   });
 
   disableButton: boolean = $derived(
     this.building ||
-      this.region === null ||
-      this.inputFile === null ||
+      this.options?.region == null ||
+      this.inputData.length === 0 ||
       this.tag === "" ||
-      this.outFileName === "" ||
-      (this.platform === "wii" && (!this.title || !this.channelId)),
+      this.outFileName === "",
   );
 
   reset() {
-    this.buttonText = "Build";
-    this.showLoading = false;
     this.building = false;
   }
 
   showError(message: string) {
     this.alertText = message;
     this.isAlertVisible = true;
+    this.inputData = new Uint8Array();
+    this.options = null;
     this.reset();
   }
 }

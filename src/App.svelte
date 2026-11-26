@@ -3,14 +3,9 @@
   import { onMount, setContext } from "svelte";
 
   import { runPatch } from "$lib/patch";
-  import { builders } from "$lib/patch.settings";
+  import { buildSettings } from "$lib/patch.settings";
   import { PatcherState } from "$lib/patcherState.svelte";
-  import {
-    getLatestTag,
-    getS3File,
-    readFileAsUint8Array,
-    saveUint8ArrayToFile,
-  } from "$lib/util";
+  import { getLatestTag, getS3File, saveUint8ArrayToFile } from "$lib/util";
 
   import BuildControls from "./components/BuildControls.svelte";
   import FileUploader from "./components/FileUploader.svelte";
@@ -36,25 +31,20 @@
 
   async function buildFp() {
     patcher.isAlertVisible = false;
-    patcher.reloadAlert++;
-    if (!patcher.inputFile) return;
-    if (!patcher.region) return;
-    if (!patcher.platform) return;
+    const options = $state.snapshot(patcher.options);
+    if (options?.region == null) return;
     patcher.building = true;
-    patcher.buttonText = "Building...";
-    patcher.showLoading = true;
 
     try {
-      const patchFile = await getS3File(
-        `fp/${patcher.tag}/${patcher.region}.xdelta`,
+      const romPatch = await getS3File(
+        `fp/${patcher.tag}/${options.region}.xdelta`,
       );
-      const input = await readFileAsUint8Array(patcher.inputFile);
-
-      savePatchedFile(
-        await runPatch(
-          await builders[patcher.platform](patcher, input, patchFile),
-        ),
+      const settings = await buildSettings(
+        options,
+        patcher.inputData,
+        romPatch,
       );
+      savePatchedFile(await runPatch(settings));
     } catch (error) {
       patcher.showError(error instanceof Error ? error.message : String(error));
     }

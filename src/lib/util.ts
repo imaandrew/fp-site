@@ -36,8 +36,7 @@ export async function getLatestTag(): Promise<string> {
   return tag;
 }
 
-export async function getCrc(file: File): Promise<number> {
-  const data = await readFileAsUint8Array(file);
+export function getCrc(data: Uint8Array): number {
   return buf(data) >>> 0;
 }
 

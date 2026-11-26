@@ -1,46 +1,46 @@
 import type { PatcherSettings } from "$wasm/fp_web_patcher";
 
-import type { PatcherState, Platform } from "$lib/patcherState.svelte";
 import { getS3File, swapBytes } from "$lib/util";
 
-export interface PlatformPatcher {
-  patch(input: Uint8Array, patchFile: Uint8Array): Promise<Worker>;
-}
-type SettingsBuilder = (
-  s: PatcherState,
+import type {
+  N64Options,
+  PlatformOptions,
+  WiiOptions,
+  WiiUOptions,
+} from "./platform";
+
+function n64(
+  _o: N64Options,
   input: Uint8Array,
   romPatch: Uint8Array,
-) => Promise<PatcherSettings>;
-
-const n64: SettingsBuilder = async (_s, input, romPatch) => {
+): Promise<PatcherSettings> {
   swapBytes(input);
-  return new Promise((resolve) => {
-    resolve({ n64: { input, rom_patch: romPatch } });
-  });
-};
+  return Promise.resolve({ n64: { input, rom_patch: romPatch } });
+}
 
-const wii: SettingsBuilder = async (s, input, romPatch) => {
-  if (!s.region) {
-    throw new Error("region not set");
-  }
+async function wii(
+  o: WiiOptions,
+  input: Uint8Array,
+  romPatch: Uint8Array,
+): Promise<PatcherSettings> {
   const [memPatch, hbPatch, hbBin] = await Promise.all([
     getS3File("gzi/mem_patch.gzi"),
-    getS3File(`gzi/hb_${s.region}.gzi`),
-    getS3File(`hb/${s.region}.bin`),
+    getS3File(`gzi/hb_${o.region}.gzi`),
+    getS3File(`hb/${o.region}.bin`),
   ]);
 
-  const concatPatch = new Uint8Array(memPatch.length + hbPatch.length);
+  const concatPatch = new Uint8Array(memPatch.length + 1 + hbPatch.length);
   concatPatch.set(memPatch, 0);
-  concatPatch[memPatch.length - 1] = 10;
-  concatPatch.set(hbPatch, memPatch.length);
+  concatPatch[memPatch.length] = "\n".charCodeAt(0);
+  concatPatch.set(hbPatch, memPatch.length + 1);
 
   return {
     wii: {
       input,
       rom_patch: romPatch,
       gzi_patch: concatPatch,
-      channel_id: s.channelId,
-      title: s.title,
+      channel_id: o.channelId,
+      title: o.title,
       dol_patch: {
         dol_num: 1,
         load_addr: 0x90000800,
@@ -48,22 +48,26 @@ const wii: SettingsBuilder = async (s, input, romPatch) => {
       },
     },
   };
-};
+}
 
-const wiiu: SettingsBuilder = async (s, input, romPatch) => {
-  if (!s.region) {
+async function wiiu(
+  o: WiiUOptions,
+  input: Uint8Array,
+  romPatch: Uint8Array,
+): Promise<PatcherSettings> {
+  if (!o.region) {
     throw new Error("region not set");
   }
   let frameLayoutPath = "wiiu/FrameLayout";
-  if (s.enableDarkFilter) {
+  if (o.enableDarkFilter) {
     frameLayoutPath += "_dark";
   }
-  if (s.enableWidescreen) {
+  if (o.enableWidescreen) {
     frameLayoutPath += "_wide";
   }
 
   const [config, frameLayout] = await Promise.all([
-    getS3File(`wiiu/${s.region}.ini`),
+    getS3File(`wiiu/${o.region}.ini`),
     getS3File(`${frameLayoutPath}.arc`),
   ]);
 
@@ -71,13 +75,26 @@ const wiiu: SettingsBuilder = async (s, input, romPatch) => {
     wiiu: {
       input,
       rom_patch: romPatch,
-      enable_dark_filter: s.enableDarkFilter,
-      enable_widescreen: s.enableWidescreen,
+      enable_dark_filter: o.enableDarkFilter,
+      enable_widescreen: o.enableWidescreen,
       config,
       frame_layout: frameLayout,
-      region: s.region,
+      region: o.region,
     },
   };
-};
+}
 
-export const builders: Record<Platform, SettingsBuilder> = { n64, wii, wiiu };
+export function buildSettings(
+  o: PlatformOptions,
+  input: Uint8Array,
+  romPatch: Uint8Array,
+) {
+  switch (o.platform) {
+    case "n64":
+      return n64(o, input, romPatch);
+    case "wii":
+      return wii(o, input, romPatch);
+    case "wiiu":
+      return wiiu(o, input, romPatch);
+  }
+}
