@@ -3,7 +3,11 @@ import __wbg_init, { patch, type PatcherSettings } from "$wasm/fp_web_patcher";
 self.onmessage = (e: MessageEvent<PatcherSettings>) => {
   __wbg_init()
     .then(() => {
-      postMessage({ ok: true, data: patch(e.data) });
+      const data = patch(e.data);
+      postMessage(
+        { ok: true, data },
+        { transfer: [data.buffer as ArrayBuffer] },
+      );
     })
     .catch((e: unknown) => {
       console.error(e);

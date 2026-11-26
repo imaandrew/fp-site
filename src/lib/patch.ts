@@ -1,10 +1,16 @@
 import type { PatcherSettings } from "$wasm/fp_web_patcher";
 
-export interface WorkerResponse {
-  ok: boolean;
-  data: Uint8Array;
+interface WorkerFailed {
+  ok: false;
   error: string;
 }
+
+interface WorkerSucceeded {
+  ok: true;
+  data: Uint8Array;
+}
+
+type WorkerResponse = WorkerFailed | WorkerSucceeded;
 
 export async function runPatch(settings: PatcherSettings): Promise<Uint8Array> {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), {
