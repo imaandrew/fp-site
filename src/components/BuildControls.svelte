@@ -29,7 +29,13 @@
   />
 </div>
 {#if patcher.isAlertVisible}
-  <Alert dismissable bind:alertStatus={patcher.isAlertVisible} transition={slide} color="red" class="mt-6">
+  <Alert
+    dismissable
+    bind:alertStatus={patcher.isAlertVisible}
+    transition={slide}
+    color="red"
+    class="mt-6"
+  >
     {#snippet icon()}
       <CloseCircleSolid class="h-5 w-5" />
     {/snippet}
